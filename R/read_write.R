@@ -34,11 +34,11 @@ get_spss <- function(file){
   #' spss <- get_spss(file)
   #' spss.data <- spss$sav
   #' spss.vars <- spss$vars
-  
+
   spss <- read_spss(file)
   spss <- as_factor(spss,only_labelled = TRUE,ordered=TRUE)
   vars <- df_summary(spss)
-  
+
   return(list(sav=spss,vars=df.vars))
 }
 
@@ -55,7 +55,7 @@ write_spss <- function(df,file,max=255){
   #'
   #' @examples
   #' spss.data <- write_sav(df,file)
-  
+
   df <- as.data.frame(purrr::map(df,function(x){
     z <- x
     if(is.character(x) == TRUE){
@@ -67,7 +67,7 @@ write_spss <- function(df,file,max=255){
     attributes(z) <- attributes(x)
     return(z)
   }))
-  
+
   ret <- haven::write_sav(df,file)
   return(ret)
 }
@@ -86,7 +86,7 @@ clipboard_get <- function(){
   #' clipboard_get()
   #'
   #'
-  df <- read.table('clipboard',sep="\t",row.names = FALSE,dec = ".",header = TRUE)
+  df <- read.table('clipboard',sep="\t",dec = ".",header = TRUE)
   return(df)
 }
 
@@ -116,10 +116,10 @@ update_xlsx <- function(df,file,sheet){
   #'
   #' @examples
   #' update_xlsx(df,wb,sheet)
-  
+
   wb <- loadWorkbook(file)
   sheets <- sheets(wb)
-  
+
   if (sheet %in% sheets){
     removeWorksheet(wb,sheet)
     addWorksheet(wb,sheet)
@@ -129,8 +129,8 @@ update_xlsx <- function(df,file,sheet){
   } else {
     addWorksheet(wb,sheet)
   }
-  
+
   writeData(wb, sheet,df)
   saveWorkbook(wb, file, overwrite = TRUE)
-  
+
 }

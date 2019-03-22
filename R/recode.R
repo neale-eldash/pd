@@ -5,10 +5,8 @@
 # ## getting your package on github
 # #http://kbroman.org/pkg_primer/pages/github.html
 #
-# 1- git init
-# 2- git remote add nome.origem https://github.com/neale-eldash/pd
-# 3- git pull --rebase nome.origem master
-# 4- git push -u nome.origem master
+#1- git remote add origin https://github.com/neale-eldash/pd.git
+#2- git push -u origin master
 
 #############
 ## R package
@@ -39,14 +37,14 @@ dummy_all <- function(df=NULL,reg.exp=NULL,keep_all=TRUE){
   #' @examples
   #' df.dummies <- dummy_all(df,reg.exp='^P[0-9]+$',keep_all=TRUE)
   #'
-  
+
   #dplyr::selecting variables
   df <- df %>% dplyr::select(matches(reg.exp))
   inds <- sapply(df,class) %in% c("factor","character")
   df <- df[,inds]
   if (sum(inds) > 0) warning("Only Factor and Character variables are kept!!!")
   if (sum(inds) == 0) stop("No variable of the specified type's were found in the data frame!")
-  
+
   #creating names
   df.names <- df %>% tidyr::gather(var,categ)
   df.names <- df.names %>% dplyr::group_by(var,categ) %>% dplyr::summarise(freq=n())
@@ -59,7 +57,7 @@ dummy_all <- function(df=NULL,reg.exp=NULL,keep_all=TRUE){
   df.names$name <- iconv(df.names$name,from='UTF-8', to='ASCII//TRANSLIT')
   df.names$new <- paste0(df.names$var,".",df.names$n,"_",df.names$name)
   df.names <- df.names %>% ungroup() %>% dplyr::select(orig,new)
-  
+
   #setting option to include missing in model.matrix
   old.option <- options('na.action')
   options(na.action='na.pass')
@@ -75,7 +73,7 @@ dummy_all <- function(df=NULL,reg.exp=NULL,keep_all=TRUE){
     df.dummy <- df.dummy[,-1]
   }
   options(na.action=old.option)
-  
+
   #dropping empty variables
   inds <- map_lgl(df.dummy,~sum(!(is.na(.))) > 0)
   df.dummy <- df.dummy[,inds]
@@ -85,11 +83,11 @@ dummy_all <- function(df=NULL,reg.exp=NULL,keep_all=TRUE){
   df.merge <- df.merge %>% dplyr::arrange(order)
   if(sum(is.na(df.merge$new)) > 0) stop("Something went wrong with the df labels!")
   names(df.dummy) <- df.merge$new
-  
-  
-  
+
+
+
   return(df.dummy)
-  
+
 }
 
 ######################################
@@ -117,12 +115,12 @@ df_summary <- function(df,drop=FALSE){
   #' @examples
   #' summary <- df_summary(df)
   #'
-  
+
   if (drop == TRUE){
     df <- droplevels(df)
     warning('Function droplevels was used. Analised DF may be different than you expect!')
   }
-  
+
   df.sum <- tibble(
     var = names(df),
     name = purrr::map_chr(df,~ifelse(is.null(attr(.,which="label")),NA,attr(.,which="label"))),
@@ -131,9 +129,9 @@ df_summary <- function(df,drop=FALSE){
     na = purrr::map_int(df,~sum(is.na(.))),
     n.distinct = purrr::map_int(df,~length(unique(.)))
   )
-  
+
   return(df.sum)
-  
+
 }
 
 tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
@@ -151,25 +149,25 @@ tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
   #' @examples
   #' df.tab <- tab_summary(df=df,reg.exp_lin='^P1[0-4]$',reg.exp_col='^P2[6-9]$',wgt=NULL)
   #'
-  
-  
+
+
   if (is.null(wgt)){
     df$peso <- 1
   } else {
     df$peso <- df[,wgt]
   }
-  
+
   df.tab <- df %>% dplyr::select(peso,matches(reg.exp_lin),matches(reg.exp_col)) %>% tidyr::gather(var,categ,matches(reg.exp_lin)) %>% tidyr::gather(seg,grp,matches(reg.exp_col))
   df.tab <- df.tab %>% dplyr::group_by(seg,grp,var,categ) %>% dplyr::summarise(freq=sum(peso,na.rm = TRUE))
   df.tab <- df.tab %>% dplyr::group_by(seg,grp,var) %>% dplyr::mutate(freq=round(100*freq/sum(freq),1))
   df.tab <- df.tab %>% tidyr::unite(grp,seg,grp)
   df.tab <- df.tab %>% tidyr::spread(grp,freq)
-  
+
   df.tot.lin <- df %>% dplyr::select(peso,matches(reg.exp_lin)) %>% tidyr::gather(var,categ,matches(reg.exp_lin))
   df.tot.lin <- df.tot.lin %>% dplyr::group_by(var,categ) %>% dplyr::summarise(total=sum(peso,na.rm = TRUE))
   df.tot.lin <- df.tot.lin %>% dplyr::group_by(var) %>% dplyr::mutate(total=round(100*total/sum(total),1))
-  
+
   df.tab <- dplyr::left_join(df.tot.lin,df.tab,by=c("var","categ"))
-  
+
   return(df.tab)
 }
