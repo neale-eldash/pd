@@ -172,11 +172,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
     }
   }
   if (length(check.vars.svy) != length(check.vars.pop)){
-    warning("O número de variáveis de cota em cada base diverge. Serão usadas essas variáveis:")
-  } else {
-    warning("As variáveis de cota utilizadas na ponderação serão:")
+    warning("O número de variáveis de cota em cada base diverge.")
   }
-  print(vars_cota)
 
   ############
   ### checando variavel cruzamento
@@ -191,8 +188,6 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   } else if (length(var_cruz) > 1) {
     stop("Mais de uma variável de cruzamento encontrada na base.")
   } else {
-    warning("A variável de cruzamento utilizada será:")
-    print(var_cruz)
     vars_cota <- setdiff(vars_cota,var_cruz)
   }
 
@@ -406,11 +401,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     }
   }
   if (length(check.vars.svy) != length(check.vars.pop)){
-    warning("O número de variáveis de cota em cada base diverge. Serão usadas essas variáveis:")
-  } else {
-    warning("As variáveis de cota utilizadas na ponderação serão:")
+    warning("O número de variáveis de cota em cada base diverge.")
   }
-  print(vars_cota)
 
   ############
   ### checando variavel cruzamento
