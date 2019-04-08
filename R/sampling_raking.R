@@ -76,6 +76,25 @@ check_categs <- function(x,y){
   return(df)
 }
 
+check_targets <- function(x,t){
+
+  df.x <- x %>% drop_na() %>% gather(var,categ) %>% group_by(var,categ) %>% count() %>% rename(n.x=n)
+
+  if ('cruz' %in% names(t)){
+    df.y <- t %>% select(-cruz) %>% group_by(var,categ) %>% summarise(n.y=sum(pop))
+  } else {
+    df.y <- t %>% group_by(var,categ) %>% summarise(n.y=sum(pop))
+  }
+
+  df <- df.x %>% full_join(df.y)
+  if (sum(is.na(df$n.x))>0 | sum(is.na(df$n.y))>0){
+    print(df)
+    stop("erro de codificação das variáveis.")
+  }
+
+  return(df)
+}
+
 rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA,reg.exp.wgts=NA){
   #' Rake sample to match population. Population input is a data frame of the \emph{population}.
   #'
@@ -96,14 +115,14 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #' @param reg.exp.vars A \emph{string} with the regular expression identifying the target variables (i.e., those
   #' variables that the sample total should match the population total). These variables should exist in both the
   #' sample and population dataframes.
-  #' @param reg.exp.cruz A \emph{string} with the regular expression identifying the variable which the target
+  #' @param reg.exp.cruz [Optional] A \emph{string} with the regular expression identifying the variable which the target
   #' variables are crossed by (usually reagion). The target variables will match the population within each label of
   #' the crossing variable. These variables should exist in both the sample and population dataframes.
   #' @param reg.exp.id A \emph{string} with the regular expression identifying the unique id variable. This variable
   #' needs to exist only in the sample dataframe.
-  #' @param reg.exp.wgts A \emph{string} with the regular expression identifying the population weight variable.
+  #' @param reg.exp.wgts [Optional] A \emph{string} with the regular expression identifying the population weight variable.
   #' This variable needs to exist only in the population dataframe.
-  #' @return A list with two components:
+  #' @return A list with three components:
   #' \itemize{
   #'  \item \strong{weights}\emph{(dataframe)}: the original sample dataframe with the weights.
   #'  \item \strong{check.vars}\emph{(dataframe)}: comparison of all variables and labels used.
@@ -111,11 +130,12 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #' }
   #' @examples
   #'
-  #' Raking \emph{without} crossing variable:
+  #' ## Raking WITHOUT crossing variable:
   #' weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
-  #' Raking \emph{with} crossing variable:
+  #'
+  #' ## Raking WITH crossing variable:
   #' weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
-
+  #'
   reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
   reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
   reg.exp.id <- ifelse(is.na(reg.exp.id)," ",reg.exp.id)
@@ -292,7 +312,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   check <- check %>% bind_rows(check.tot)
 
   check <- check %>% select(cruz:raw,weights:diff,ends_with('.wgt'))
-  check <- check %>% rename(Cruzamento=cruz, Variável=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, População=pop,Diferença=diff)
+  check <- check %>% rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
   check <- as.data.frame(check)
   check <- check %>% filter(Amostra != nrow(df.svy))
 
@@ -307,11 +327,220 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
 
 }
 
+rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA){
+  #' Rake sample to match population. Population input is a data frame of the targets.
+  #'
+  #' This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
+  #' \itemize{
+  #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
+  #'  \item \strong{Rake sample}: Uses a adjusted raking algorithm adapted from
+  #'  in \code{\link[survey]{rake}}.
+  #'  \item \strong{Check weights}: Compares the weights to the population targets to make sure the raking
+  #'  worked.
+  #' }
+  #'
+  #' @param df.svy The sample \emph{dataframe}, containing the variables to be used in the analysis (unique id,
+  #' targets and cross-variable).
+  #' @param targets The population targets \emph{dataframe}, This df should have the following variables:
+  #' var (variable names),categ (categories labels), pop (pop count) and the optional 'cruz' which identifies
+  #'  the crossing variable. Also, if there total pop counts are different for each variable, this wont be
+  #'  corrected. The df layout is as follows:
+  #' \itemize{
+  #'  \item \strong{var}: column with the names of the target variables.
+  #'  \item \strong{categ}: column with the labels of the categories.
+  #'  \item \strong{pop}: population count for each combination.
+  #'  \item \strong{var_cruz[Optional]}: identifier of each category of the crossing variable. The name of the
+  #'  column should match the name of the cross variable in the survey dataframe.
+  #' }
+  #' @param reg.exp.vars A \emph{string} with the regular expression identifying the target variables (i.e., those
+  #' variables that the sample total should match the population total). These variables should exist in both the
+  #' sample and population dataframes.
+  #' @param reg.exp.cruz [Optional] A \emph{string} with the regular expression identifying the variable which the target
+  #' variables are crossed by (usually reagion). The target variables will match the population within each label of
+  #' the crossing variable. These variables should exist in both the sample and population dataframes.
+  #' @param reg.exp.id A \emph{string} with the regular expression identifying the unique id variable. This variable
+  #' needs to exist only in the sample dataframe.
+  #' @return A list with three components:
+  #' \itemize{
+  #'  \item \strong{weights}\emph{(dataframe)}: the original sample dataframe with the weights.
+  #'  \item \strong{check.vars}\emph{(dataframe)}: comparison of all variables and labels used.
+  #'  \item \strong{check.wgts}\emph{(dataframe)}: comparison of all weights and population totals.
+  #' }
+  #' @examples
+  #'
+  #' ## Raking WITHOUT crossing variable:
+  #' weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+  #'
+  #' ## Raking WITH crossing variable:
+  #' weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+  reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
+  reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
+  reg.exp.id <- ifelse(is.na(reg.exp.id)," ",reg.exp.id)
+
+  ####################################
+  ############  CHECKS
+  ####################################
+
+  ############
+  ### checando bases
+  if (!("data.frame" %in% class(df.svy))){
+    stop("Missing dataframe with survey data.")
+  }
+  if (sum(c("var", "categ", "pop") %in% names(targets)) !=3){
+    stop("Targets dataframe is not specified correctly.")
+  }
+
+  ############
+  ### checando variaveis cota
+  check.vars.svy <- names(select(df.svy,matches(reg.exp.vars)))
+  check.vars.pop <- unique(targets$var)
+  vars_cota <- intersect(check.vars.svy,check.vars.pop)
+  if (length(check.vars.svy) == 0 | length(check.vars.pop) == 0){
+    stop("Mão foram encontradas variáveis de cota em uma das bases.")
+  }
+  if (length(vars_cota) == 0){
+    stop("Não existem variáveis de cota comuns entre as bases.")
+  } else if (length(vars_cota) == 1){
+    if (vars_cota == "") {
+      stop("Não existem variáveis de cota comuns entre as bases.")
+    }
+  }
+  if (length(check.vars.svy) != length(check.vars.pop)){
+    warning("O número de variáveis de cota em cada base diverge. Serão usadas essas variáveis:")
+  } else {
+    warning("As variáveis de cota utilizadas na ponderação serão:")
+  }
+  print(vars_cota)
+
+  ############
+  ### checando variavel cruzamento
+  check.cruz.svy <- names(select(df.svy,matches(reg.exp.cruz)))
+  check.cruz.pop <- names(select(targets,matches(reg.exp.cruz)))
+  var_cruz <- intersect(check.cruz.svy,check.cruz.pop)
+  if (length(var_cruz) == 0) {
+    if (length(reg.exp.cruz) > 0){
+      if (reg.exp.cruz != " "){
+        stop("A variável de cruzamento não foi encontrada!")
+      }
+    }
+  } else if (length(var_cruz) > 1) {
+    stop("Mais de uma variável de cruzamento encontrada na base.")
+  } else {
+    df.svy <- df.svy %>% rename(cruz=var_cruz)
+    targets <- targets %>% rename(cruz=var_cruz)
+    vals_df <- unique(df.svy$cruz)
+    vals_target <- unique(targets$cruz)
+    if(sum(vals_df %in% vals_target) != length(vals_df)){
+      stop("Amostra e targets são incompatíveis.")
+    }
+  }
+
+  #adding cruzamento
+  if (length(var_cruz) == 0){
+    df.svy$cruz <- "Total"
+    targets$cruz <- "Total"
+  }
+  ############
+  ### checando id
+  var_id <- names(select(df.svy,matches(reg.exp.id)))
+  if (length(var_id) != 1){
+    stop("Variável ID não foi corretamente definida.")
+  } else if (var_id == "") {
+    stop("Variável ID não foi corretamente definida.")
+  }
+  df.svy[,"id"] <- df.svy[,var_id]
+
+  ############
+  ### checando categs
+  df.categs <- check_targets(select(df.svy,one_of(vars_cota)),targets)
+
+  ####################################
+  ############  PONDERAÇÃO
+  ####################################
+
+  wgts <- sort(vars_cota)
+  sample <- map(wgts,~as.formula(paste0('~',.,'+cruz')))
+  targets <- targets %>% arrange(cruz,var)
+  population <- map(wgts,function(x){
+    df.svy <- targets[targets$var == x,]
+    df.svy$var <- NULL
+    df.svy[,x] <- df.svy$categ
+    df.svy$categ <- NULL
+    return(df.svy)
+  })
+  #removing missings
+  df.comp <- df.svy %>% select(id,cruz,one_of(vars_cota)) %>% drop_na()
+  data.svy <- svydesign(id=~id,data = df.comp);
+  data.svy <- raking_svy(data.svy, sample=sample, population=population, control = list(maxit = 800))
+  df.comp$weights <- weights(data.svy)
+  df.svy <- df.svy %>% left_join(select(df.comp,id,weights))
+  #weight 1 for respondentes with missing (rescaled)
+  df.svy$weights <- ifelse(is.na(df.svy$weights),1,df.svy$weights)
+  df.svy$weights <- df.svy$weights * (nrow(df.svy) / sum(df.svy$weights))
+
+  ####################################
+  ############  CHECKS
+  ####################################
+
+  check <- df.svy[,c('weights','cruz',wgts)]
+  check <- check %>% gather(var,categ,-weights,-cruz) %>% group_by(cruz,var,categ) %>% summarise(sample=n(),raw=n(),max.wgt = max(weights),min.wgt = min(weights),weights=sum(weights))
+  check <- full_join(check,targets,by=c('cruz','var','categ'))
+  var.tot <- check$var[1]
+  check.tot <- check %>% ungroup() %>% filter(var == var.tot)
+  check <- check %>% mutate(
+    raw=round(100*raw/sum(raw,na.rm = TRUE),1),
+    weights=round(100*weights/sum(weights,na.rm = TRUE),1),
+    pop=round(100*pop/sum(pop,na.rm = TRUE),1),
+    diff=weights - pop
+  )
+
+  check.tot <- check.tot %>% group_by(cruz) %>% summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.)))
+  check.tot <- check.tot %>% ungroup() %>% mutate(
+    raw=round(100*raw/sum(raw,na.rm = TRUE),1),
+    weights=round(100*weights/sum(weights,na.rm = TRUE),1),
+    pop=round(100*pop/sum(pop,na.rm = TRUE),1),
+    diff=weights - pop
+  )
+
+  check <- check %>% bind_rows(check.tot)
+  check <- check %>% select(cruz:raw,weights:diff,ends_with('.wgt'))
+  check <- check %>% rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
+  check <- as.data.frame(check)
+  check <- check %>% filter(Amostra != nrow(df.svy))
+
+  if (length(var_cruz) == 0){
+    check$Cruzamento <- NULL
+  }
+  df.svy <- df.svy %>% select(-id,-cruz)
+
+  saida <- list(weights=df.svy,check.vars=df.categs,check.wgts=check)
+  return(saida)
+
+}
+
+# ##dados:
+# ##E:\DADOS\CONSULTORIA\PESSOAS FÍSICAS\Paulo Cidade\Atitudes Financeiras - 03-12-2018\ponderação investidores - v1.R
 # dados <- dados %>% rename(regiao=REGIAO)
 # base <- base %>% rename(sexo_cota=sexo)
 # base$regiao <- str_replace(base$regiao,"Centro Oeste","Centro-Oeste")
+#
 # teste.rake <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
 # teste.rake.cruz <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+#
+# targets <- base %>% filter(!is.na(classe_cota),!is.na(idade_cota))
+# targets <- targets %>% select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% rename(pop=pesoe)
+# targets <- targets %>% gather(var,categ,-regiao,-pop)
+# targets <- targets %>% group_by(regiao,var,categ) %>% summarise(pop=sum(pop))
+# targets.cruz <- targets %>% filter(is.na(categ) == FALSE) %>% ungroup()
+# teste.targets.cruz <- rake_target(df.svy=dados,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+#
+# targets <- base %>% filter(!is.na(classe_cota),!is.na(idade_cota))
+# targets <- targets %>% select(pesoe,sexo_cota,idade_cota,classe_cota) %>% rename(pop=pesoe)
+# targets <- targets %>% gather(var,categ,-pop)
+# targets <- targets %>% group_by(var,categ) %>% summarise(pop=sum(pop))
+# targets <- targets %>% filter(is.na(categ) == FALSE)
+# teste.targets <- rake_target(df.svy=dados,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+
 
 # ##################################################
 # ##################################################
