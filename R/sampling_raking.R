@@ -190,7 +190,8 @@ check_targets <- function(x,t){
 rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA,reg.exp.wgts=NA){
   #' Rake sample to match population (Population input is a data frame of population).
   #'
-  #' This function rakes the sample to match the population counts. This algorithm has 4 basic steps:
+  #' This function rakes the sample to match the population counts. Missing values are excluded from the
+  #' raking and get value 1 before normalization. This algorithm has 4 basic steps:
   #' \itemize{
   #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
   #'  \item \strong{Population targets}: Calculates the population targets from the population dataframe.
@@ -243,10 +244,6 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #'
   #'# Survey data
   #'data(svy.vote)
-  #'#recoding survey data to change unmatched label to missing
-  #'svy.vote$INCOME2 <- as.numeric(svy.vote$INCOME2)
-  #'svy.vote$INCOME2 <- ifelse(svy.vote$INCOME2 == 4,NA,svy.vote$INCOME2)
-  #'svy.vote$INCOME2 <- factor(svy.vote$INCOME2,levels=1:3,labels=c("Less than $25,000", "$25,000-$74,999", "$75,000 or more"))
   #'
   #'# Population data
   #'data(cps)
@@ -453,7 +450,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
 rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA){
   #' Rake sample to match population (Population input is a data frame of aggregated targets).
   #'
-  #' This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
+  #' This function rakes the sample to match the population counts. Missing values are excluded from the
+  #' raking and get value 1 before normalization. This algorithm has 3 basic steps:
   #' \itemize{
   #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
   #'  \item \strong{Rake sample}: Uses a adjusted raking algorithm adapted from
