@@ -43,7 +43,7 @@ A list with three components:
 }
 }
 \description{
-This function rakes the sample to match the population dplyr::counts. This algorithm has 3 basic steps:
+This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
 \itemize{
  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
  \item \strong{Rake sample}: Uses a adjusted raking algorithm adapted from

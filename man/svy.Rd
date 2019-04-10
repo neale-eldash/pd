@@ -20,6 +20,5 @@ Base de dados contendo perfil dos respondentes de uma pesquisa online, filtrada 
  \item{idade_cota}{idade do respondente}
  \item{classe_cota}{classe social do respondente}
  }
- @source \url{http://www.anbima.com.br/pt_br/especial/raio-x-do-investidor-2018.htm}
 }
 \keyword{datasets}

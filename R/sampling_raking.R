@@ -813,15 +813,21 @@ chaid_raking <- function(df.pop,df.svy,strata=NULL,id.var=NULL,dep=NULL,wgt.pop=
   #'
   #' ##load data
   #' # Survey data
-  #' data(svy)
+  #' data(svy.vote)
   #' # Population data
-  #' data(pop)
+  #' data(cps)
   #'
-  #' ## Raking WITHOUT crossing variable:
-  #' weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+  #' ## Raking WITHOUT strata variable:
+  #' rake.chaid <- chaid_raking(cps,svy.vote,id.var='RESPID',wgt.pop='PWSSWGT',dep='lead',minbucket = 40,cp = 0.000001)
   #'
-  #' ## Raking WITH crossing variable:
-  #' weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+  #' ## Raking WITH strata variable:
+  #' rake.chaid.strata <- chaid_raking(cps,svy.vote,strata='STATE',id.var='RESPID',wgt.pop='PWSSWGT',dep='lead',minbucket = 40,cp = 0.000001)
+  #'
+  #' ### save all trees
+  #' file <- tempfile(pattern = "trees.pdf")
+  #' pdf(file,paper = 'a4r', width = 12)
+  #' purrr::walk(rake.chaid.strata$fit,~prp(.$tree, faclen = 0, cex = 0.8, extra = 1, main=.$cells.svy$strata[[1]]))
+  #' dev.off()
 
   if(is.null(dep)){
     stop("Dependent variable must be specified!")
@@ -888,6 +894,3 @@ chaid_raking <- function(df.pop,df.svy,strata=NULL,id.var=NULL,dep=NULL,wgt.pop=
   return(saida)
 
 }
-
-
-#rake.chaid <- chaid_raking(cps,svy.vote,strata='STATE',id.var='RESPID',wgt.pop='PWSSWGT',dep='lead',minbucket = 40,cp = 0.000001)
