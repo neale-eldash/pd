@@ -249,7 +249,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #'data(cps)
   #'
   #'#creating regular expression that includes all desired variables
-  #'vars_cotas <- c("AGE_GRP", "EDU", "RACE_", "INCOME2","SEX", "employed","metro2")
+  #'#INCOME2 removido por causa de missings
+  #'vars_cotas <- c("AGE_GRP", "EDU", "RACE_","SEX", "employed","metro2")
   #'vars_cotas <- paste0("^",vars_cotas,"$")
   #'vars_cotas <- paste(vars_cotas,collapse = "|")
   #'vars_cotas <- paste0("(",vars_cotas,")")

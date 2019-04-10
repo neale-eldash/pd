@@ -107,7 +107,6 @@ file.gen2016=paste0(dir.gen2016,"\\US2016 Results Gen.RData")
  #18+ dplyr::filter
  cps <- cps[cps$AGE_GRP != "NaN",]
  cps <- cps[cps$employed != "NaN",]
- cps <- droplevels(cps)
 
  #recodes / labels to match reuters data
  aux.age <- names(xtabs(~reuters$AGE_GRP,drop.unused.levels = TRUE))
@@ -126,6 +125,8 @@ file.gen2016=paste0(dir.gen2016,"\\US2016 Results Gen.RData")
  #saving data to library
  svy.vote <- reuters %>% select(RESPID,vote,lead,lv,one_of(names(cps)))
  cps <- cps %>% select(HRHHID,PWSSWGT,one_of(names(svy.vote)))
+ cps <- cps %>% filter(!is.na(HRHHID))
+ cps <- droplevels(cps)
 
  attributes(svy.vote$vote)$label <- NULL
  attributes(svy.vote$RESPID)$label <- NULL
