@@ -1,3 +1,13 @@
+# ##importar dados:
+# ##E:\DADOS\CONSULTORIA\PESSOAS FÍSICAS\Paulo Cidade\Atitudes Financeiras - 03-12-2018\ponderação investidores - v1.R
+# svy <- dados %>% dplyr::rename(regiao=REGIAO)
+# svy <- svy %>% dplyr::select(numericalId,regiao,ends_with('_cota'))
+# pop <- base %>% dplyr::rename(sexo_cota=sexo)
+# pop$regiao <- str_replace(pop$regiao,"Centro Oeste","Centro-Oeste")
+# pop <- pop %>% dplyr::filter(RCLASSE2 %in% c("CLASSE A","Classe B2","Classe B1"),idade1 %in% 25:70)
+# pop <- pop %>% dplyr::select(nquest,pesoe,regiao,ends_with('_cota'))
+# devtools::use_data(svy,pop)
+
 #' Dados da Ambima
 #'
 #' Base de dados contendo perfil de investidores do Brasil, filtrada para classe AB e idade entre 25 e 70
@@ -563,34 +573,6 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   return(saida)
 
 }
-
-# ##dados:
-# ##E:\DADOS\CONSULTORIA\PESSOAS FÍSICAS\Paulo Cidade\Atitudes Financeiras - 03-12-2018\ponderação investidores - v1.R
-# svy <- dados %>% dplyr::rename(regiao=REGIAO)
-# svy <- svy %>% dplyr::select(numericalId,regiao,ends_with('_cota'))
-# pop <- base %>% dplyr::rename(sexo_cota=sexo)
-# pop$regiao <- str_replace(pop$regiao,"Centro Oeste","Centro-Oeste")
-# pop <- pop %>% dplyr::filter(RCLASSE2 %in% c("CLASSE A","Classe B2","Classe B1"),idade1 %in% 25:70)
-# pop <- pop %>% dplyr::select(nquest,pesoe,regiao,ends_with('_cota'))
-# devtools::use_data(svy,pop)
-#
-# teste.rake <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
-# teste.rake.cruz <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
-#
-# targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
-# targets <- targets %>% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
-# targets <- targets %>% tidyr::gather(var,categ,-regiao,-pop)
-# targets <- targets %>% dplyr::group_by(regiao,var,categ) %>% dplyr::summarise(pop=sum(pop))
-# targets.cruz <- targets %>% dplyr::filter(is.na(categ) == FALSE) %>% ungroup()
-# teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
-#
-# targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
-# targets <- targets %>% dplyr::select(pesoe,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
-# targets <- targets %>% tidyr::gather(var,categ,-pop)
-# targets <- targets %>% dplyr::group_by(var,categ) %>% dplyr::summarise(pop=sum(pop))
-# targets <- targets %>% dplyr::filter(is.na(categ) == FALSE)
-# teste.targets <- rake_target(df.svy=svy,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
-
 
 # ##################################################
 # ##################################################
