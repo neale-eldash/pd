@@ -352,4 +352,7 @@ file.gen2016=paste0(dir.gen2016,"\\US2016 Results Gen.RData")
  #saving data to library
  svy.vote <- reuters %>% select(RESPID,vote,lead,lv,one_of(names(cps)))
  cps <- cps %>% select(HRHHID,PWSSWGT,one_of(names(svy.vote)))
- devtools::use_data(svy.vote,cps)
+
+ attributes(svy.vote$vote)$label <- NULL
+ attributes(svy.vote$RESPID)$label <- NULL
+ devtools::use_data(svy.vote,cps,overwrite = TRUE)
