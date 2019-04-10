@@ -37,7 +37,8 @@ A list with three components:
 }
 }
 \description{
-This function rakes the sample to match the population counts. This algorithm has 4 basic steps:
+This function rakes the sample to match the population counts. Missing values are excluded from the
+raking and get value 1 before normalization. This algorithm has 4 basic steps:
 \itemize{
  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
  \item \strong{Population targets}: Calculates the population targets from the population dataframe.
@@ -70,10 +71,6 @@ weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^re
 
 # Survey data
 data(svy.vote)
-#recoding survey data to change unmatched label to missing
-svy.vote$INCOME2 <- as.numeric(svy.vote$INCOME2)
-svy.vote$INCOME2 <- ifelse(svy.vote$INCOME2 == 4,NA,svy.vote$INCOME2)
-svy.vote$INCOME2 <- factor(svy.vote$INCOME2,levels=1:3,labels=c("Less than $25,000", "$25,000-$74,999", "$75,000 or more"))
 
 # Population data
 data(cps)
