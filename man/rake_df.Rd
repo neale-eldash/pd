@@ -2,7 +2,7 @@
 % Please edit documentation in R/sampling_raking.R
 \name{rake_df}
 \alias{rake_df}
-\title{Rake sample to match population. Population input is a data frame of the \emph{population}.}
+\title{Rake sample to match population (Population input is a data frame of population).}
 \usage{
 rake_df(df.svy = NA, df.pop = NA, reg.exp.vars = NA,
   reg.exp.cruz = NA, reg.exp.id = NA, reg.exp.wgts = NA)

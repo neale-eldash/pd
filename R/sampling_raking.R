@@ -823,10 +823,10 @@ chaid_raking <- function(df.pop,df.svy,strata=NULL,id.var=NULL,dep=NULL,wgt.pop=
   #' ## Raking WITH strata variable:
   #' rake.chaid.strata <- chaid_raking(cps,svy.vote,strata='STATE',id.var='RESPID',wgt.pop='PWSSWGT',dep='lead',minbucket = 40,cp = 0.000001)
   #'
-  #' ### save all trees
-  #' file <- tempfile(pattern = "trees.pdf")
+  #' ### save all trees - chaid raking with strata
+  #' file <- "C://tree_raking.pdf"
   #' pdf(file,paper = 'a4r', width = 12)
-  #' purrr::walk(rake.chaid.strata$fit,~prp(.$tree, faclen = 0, cex = 0.8, extra = 1, main=.$cells.svy$strata[[1]]))
+  #' purrr::walk(rake.chaid.strata$trees$fit,~prp(.$tree, faclen = 0, cex = 0.8, extra = 1, main=.$cells.svy$strata[[1]]))
   #' dev.off()
 
   if(is.null(dep)){

@@ -2,10 +2,7 @@
 % Please edit documentation in R/sampling_raking.R
 \name{chaid_raking}
 \alias{chaid_raking}
-\title{CHAID Rake sample to match population. Population input is a data frame of the \emph{population}. This
-raking strategy is based on CHAID trees. The main idea is to run a CHAID tree in the survey data, using a
-pre-defined dependent variable (such as voting intention), then using the resulting leafs of the tree as the
-cells for raking.}
+\title{CHAID Rake sample to match population (Population input is a data frame of population).}
 \usage{
 chaid_raking(df.pop, df.svy, strata = NULL, id.var = NULL,
   dep = NULL, wgt.pop = NULL, minbucket = 30, cp = 0.001)
@@ -50,7 +47,10 @@ A list with three components:
 }
 }
 \description{
-This function CHAID rakes the sample to match the population counts. This algorithm has 5 basic steps:
+This function CHAID rakes the sample to match the population counts. This raking strategy is based
+on CHAID trees. The main idea is to run a CHAID tree in the survey data, using a pre-defined dependent
+variable (such as voting intention), then using the resulting leafs of the tree as the
+cells for raking. This algorithm has 5 basic steps:
 \itemize{
  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
  \item \strong{CHAID Tree}: Run the tree on the survey data, and create the resulting cells in both
