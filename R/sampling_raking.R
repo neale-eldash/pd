@@ -256,7 +256,6 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #'vars_cotas <- paste0("(",vars_cotas,")")
   #'
   #'## Raking WITHOUT crossing variable:
-  #'#debugonce(rake_df)
   #'weights <- rake_df(df.svy=svy.vote,df.pop=cps,reg.exp.vars=vars_cotas,reg.exp.id="^RESPID$",reg.exp.wgts="^PWSSWGT$")
   #'
   #'## Raking WITH crossing variable:
