@@ -188,7 +188,7 @@ check_targets <- function(x,t){
 }
 
 rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA,reg.exp.wgts=NA){
-  #' Rake sample to match population. Population input is a data frame of the \emph{population}.
+  #' Rake sample to match population (Population input is a data frame of population).
   #'
   #' This function rakes the sample to match the population counts. This algorithm has 4 basic steps:
   #' \itemize{
@@ -422,7 +422,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
 }
 
 rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA){
-  #' Rake sample to match population. Population input is a data frame of the targets.
+  #' Rake sample to match population (Population input is a data frame of aggregated targets).
   #'
   #' This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
   #' \itemize{
@@ -764,12 +764,12 @@ create_tree_grps <- function(df.pop,df.svy,strata=NULL,dep=NULL,wgt.pop=NULL,min
 }
 
 chaid_raking <- function(df.pop,df.svy,strata=NULL,id.var=NULL,dep=NULL,wgt.pop=NULL,minbucket = 30,cp = 0.001){
-  #' CHAID Rake sample to match population. Population input is a data frame of the \emph{population}. This
-  #' raking strategy is based on CHAID trees. The main idea is to run a CHAID tree in the survey data, using a
-  #' pre-defined dependent variable (such as voting intention), then using the resulting leafs of the tree as the
-  #' cells for raking.
+  #' CHAID Rake sample to match population (Population input is a data frame of population).
   #'
-  #' This function CHAID rakes the sample to match the population counts. This algorithm has 5 basic steps:
+  #' This function CHAID rakes the sample to match the population counts. This raking strategy is based
+  #' on CHAID trees. The main idea is to run a CHAID tree in the survey data, using a pre-defined dependent
+  #' variable (such as voting intention), then using the resulting leafs of the tree as the
+  #' cells for raking. This algorithm has 5 basic steps:
   #' \itemize{
   #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
   #'  \item \strong{CHAID Tree}: Run the tree on the survey data, and create the resulting cells in both
