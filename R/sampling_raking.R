@@ -222,7 +222,9 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #' }
   #' @examples
   #'
-  #' ##load data
+  #' ###################
+  #' ##Example 1
+  #' ###################
   #'
   #' # Survey data
   #' data(svy)
@@ -235,6 +237,33 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #' ## Raking WITH crossing variable:
   #' weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
   #'
+  #' ###################
+  #' ##Example 2
+  #' ###################
+  #'
+  #'# Survey data
+  #'data(svy.vote)
+  #'#recoding survey data to change unmatched label to missing
+  #'svy.vote$INCOME2 <- as.numeric(svy.vote$INCOME2)
+  #'svy.vote$INCOME2 <- ifelse(svy.vote$INCOME2 == 4,NA,svy.vote$INCOME2)
+  #'svy.vote$INCOME2 <- factor(svy.vote$INCOME2,levels=1:3,labels=c("Less than $25,000", "$25,000-$74,999", "$75,000 or more"))
+  #'
+  #'# Population data
+  #'data(cps)
+  #'
+  #'#creating regular expression that includes all desired variables
+  #'vars_cotas <- c("AGE_GRP", "EDU", "RACE_", "INCOME2","SEX", "employed","metro2")
+  #'vars_cotas <- paste0("^",vars_cotas,"$")
+  #'vars_cotas <- paste(vars_cotas,collapse = "|")
+  #'vars_cotas <- paste0("(",vars_cotas,")")
+  #'
+  #'## Raking WITHOUT crossing variable:
+  #'#debugonce(rake_df)
+  #'weights <- rake_df(df.svy=svy.vote,df.pop=cps,reg.exp.vars=vars_cotas,reg.exp.id="^RESPID$",reg.exp.wgts="^PWSSWGT$")
+  #'
+  #'## Raking WITH crossing variable:
+  #'weights.cross <- rake_df(df.svy=svy.vote,df.pop=cps,reg.exp.vars=vars_cotas,reg.exp.cruz="^GEODIV9$",reg.exp.id="^RESPID$",reg.exp.wgts="^PWSSWGT$")
+
   reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
   reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
   reg.exp.id <- ifelse(is.na(reg.exp.id)," ",reg.exp.id)
