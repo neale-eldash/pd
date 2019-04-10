@@ -7,7 +7,9 @@ Description: Functions I use frequently
 License: use anyway you like
 Encoding: UTF-8
 LazyData: true
-Imports: tidyverse,
+Depends: tidyverse,
+         lubridate,
+         magrittr,
          haven,
          survey,
          sampling,

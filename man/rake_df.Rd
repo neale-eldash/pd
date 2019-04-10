@@ -37,7 +37,7 @@ A list with three components:
 }
 }
 \description{
-This function rakes the sample to match the population counts. This algorithm has 4 basic steps:
+This function rakes the sample to match the population dplyr::counts. This algorithm has 4 basic steps:
 \itemize{
  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
  \item \strong{Population targets}: Calculates the population targets from the population dataframe.
@@ -49,10 +49,17 @@ This function rakes the sample to match the population counts. This algorithm ha
 }
 \examples{
 
+##load data
+
+# Survey data
+data(svy)
+# Population data
+data(pop)
+
 ## Raking WITHOUT crossing variable:
-weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
 
 ## Raking WITH crossing variable:
-weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
 
 }

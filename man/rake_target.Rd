@@ -12,13 +12,13 @@ rake_target(df.svy = NA, targets = NA, reg.exp.vars = NA,
 targets and cross-variable).}
 
 \item{targets}{The population targets \emph{dataframe}, This df should have the following variables:
-var (variable names),categ (categories labels), pop (pop count) and the optional 'cruz' which identifies
- the crossing variable. Also, if there total pop counts are different for each variable, this wont be
+var (variable names),categ (categories labels), pop (pop dplyr::count) and the optional 'cruz' which identifies
+ the crossing variable. Also, if there total pop dplyr::counts are different for each variable, this wont be
  corrected. The df layout is as follows:
 \itemize{
  \item \strong{var}: column with the names of the target variables.
  \item \strong{categ}: column with the labels of the categories.
- \item \strong{pop}: population count for each combination.
+ \item \strong{pop}: population dplyr::count for each combination.
  \item \strong{var_cruz[Optional]}: identifier of each category of the crossing variable. The name of the
  column should match the name of the cross variable in the survey dataframe.
 }}
@@ -43,7 +43,7 @@ A list with three components:
 }
 }
 \description{
-This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
+This function rakes the sample to match the population dplyr::counts. This algorithm has 3 basic steps:
 \itemize{
  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
  \item \strong{Rake sample}: Uses a adjusted raking algorithm adapted from
@@ -53,10 +53,25 @@ This function rakes the sample to match the population counts. This algorithm ha
 }
 }
 \examples{
+##load data
+# Survey data
+data(svy)
+# Population data
+data(pop)
 
 ## Raking WITHOUT crossing variable:
-weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+targets <- pop \%>\% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+targets <- targets \%>\% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) \%>\% dplyr::rename(pop=pesoe)
+targets <- targets \%>\% tidyr::gather(var,categ,-regiao,-pop)
+targets <- targets \%>\% dplyr::group_by(regiao,var,categ) \%>\% dplyr::summarise(pop=sum(pop))
+targets.cruz <- targets \%>\% dplyr::filter(is.na(categ) == FALSE) \%>\% ungroup()
+teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
 
 ## Raking WITH crossing variable:
-weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+targets <- pop \%>\% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+targets <- targets \%>\% dplyr::select(pesoe,sexo_cota,idade_cota,classe_cota) \%>\% dplyr::rename(pop=pesoe)
+targets <- targets \%>\% tidyr::gather(var,categ,-pop)
+targets <- targets \%>\% dplyr::group_by(var,categ) \%>\% dplyr::summarise(pop=sum(pop))
+targets <- targets \%>\% dplyr::filter(is.na(categ) == FALSE)
+teste.targets <- rake_target(df.svy=svy,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
 }

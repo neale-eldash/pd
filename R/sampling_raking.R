@@ -1,3 +1,34 @@
+#' Dados da Ambima
+#'
+#' Base de dados contendo perfil de investidores do Brasil, filtrada para classe AB e idade entre 25 e 70
+#'
+#'  @format Um dataframe com 967 casos e 6 variáveis:
+#'  \describe{
+#'  \item{nquest}{id do respondente}
+#'  \item{pesoe}{peso do respondente}
+#'  \item{regiao}{região do país}
+#'  \item{sexo_cota}{sexo do respondente}
+#'  \item{idade_cota}{idade do respondente}
+#'  \item{classe_cota}{classe social do respondente}
+#'  }
+#'  @source \url{http://www.anbima.com.br/pt_br/especial/raio-x-do-investidor-2018.htm}
+"pop"
+
+#' Pesquisa online com investidores
+#'
+#' Base de dados contendo perfil dos respondentes de uma pesquisa online, filtrada para classe AB e idade entre 25 e 70
+#'
+#'  @format Um dataframe com 1032 casos e 5 variáveis:
+#'  \describe{
+#'  \item{numericalId}{id do respondente}
+#'  \item{regiao}{região do país}
+#'  \item{sexo_cota}{sexo do respondente}
+#'  \item{idade_cota}{idade do respondente}
+#'  \item{classe_cota}{classe social do respondente}
+#'  }
+#'  @source \url{http://www.anbima.com.br/pt_br/especial/raio-x-do-investidor-2018.htm}
+"svy"
+
 raking_svy <- function (design, sample.margins, population.margins, control = list(maxit = 10,epsilon = 1, verbose = FALSE), compress = NULL){
   #' Function for running the raking algorithm from the survey package, ignoring missing marginals
   #'
@@ -66,9 +97,9 @@ raking_svy <- function (design, sample.margins, population.margins, control = li
 }
 
 check_categs <- function(x,y){
-  df.x <- x %>% drop_na() %>% gather(var,categ) %>% group_by(var,categ) %>% count() %>% rename(n.x=n)
-  df.y <- y %>% drop_na() %>% gather(var,categ) %>% group_by(var,categ) %>% count() %>% rename(n.y=n)
-  df <- df.x %>% full_join(df.y)
+  df.x <- x %>% tidyr::drop_na() %>% tidyr::gather(var,categ) %>% dplyr::group_by(var,categ) %>% dplyr::count() %>% dplyr::rename(n.x=n)
+  df.y <- y %>% tidyr::drop_na() %>% tidyr::gather(var,categ) %>% dplyr::group_by(var,categ) %>% dplyr::count() %>% dplyr::rename(n.y=n)
+  df <- df.x %>% dplyr::full_join(df.y)
   if (sum(is.na(df$n.x))>0 | sum(is.na(df$n.y))>0){
     print(df)
     stop("erro de codificação das variáveis.")
@@ -78,15 +109,15 @@ check_categs <- function(x,y){
 
 check_targets <- function(x,t){
 
-  df.x <- x %>% drop_na() %>% gather(var,categ) %>% group_by(var,categ) %>% count() %>% rename(n.x=n)
+  df.x <- x %>% tidyr::drop_na() %>% tidyr::gather(var,categ) %>% dplyr::group_by(var,categ) %>% dplyr::count() %>% dplyr::rename(n.x=n)
 
   if ('cruz' %in% names(t)){
-    df.y <- t %>% select(-cruz) %>% group_by(var,categ) %>% summarise(n.y=sum(pop))
+    df.y <- t %>% dplyr::select(-cruz) %>% dplyr::group_by(var,categ) %>% dplyr::summarise(n.y=sum(pop))
   } else {
-    df.y <- t %>% group_by(var,categ) %>% summarise(n.y=sum(pop))
+    df.y <- t %>% dplyr::group_by(var,categ) %>% dplyr::summarise(n.y=sum(pop))
   }
 
-  df <- df.x %>% full_join(df.y)
+  df <- df.x %>% dplyr::full_join(df.y)
   if (sum(is.na(df$n.x))>0 | sum(is.na(df$n.y))>0){
     print(df)
     stop("erro de codificação das variáveis.")
@@ -98,7 +129,7 @@ check_targets <- function(x,t){
 rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA,reg.exp.wgts=NA){
   #' Rake sample to match population. Population input is a data frame of the \emph{population}.
   #'
-  #' This function rakes the sample to match the population counts. This algorithm has 4 basic steps:
+  #' This function rakes the sample to match the population dplyr::counts. This algorithm has 4 basic steps:
   #' \itemize{
   #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
   #'  \item \strong{Population targets}: Calculates the population targets from the population dataframe.
@@ -130,11 +161,18 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   #' }
   #' @examples
   #'
+  #' ##load data
+  #'
+  #' # Survey data
+  #' data(svy)
+  #' # Population data
+  #' data(pop)
+  #'
   #' ## Raking WITHOUT crossing variable:
-  #' weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+  #' weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
   #'
   #' ## Raking WITH crossing variable:
-  #' weights <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+  #' weights <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
   #'
   reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
   reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
@@ -158,8 +196,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ############
   ### checando variaveis cota
 
-  check.vars.svy <- names(select(df.svy,matches(reg.exp.vars)))
-  check.vars.pop <- names(select(df.pop,matches(reg.exp.vars)))
+  check.vars.svy <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.vars)))
+  check.vars.pop <- names(dplyr::select(df.pop,dplyr::matches(reg.exp.vars)))
   vars_cota <- intersect(check.vars.svy,check.vars.pop)
   if (length(check.vars.svy) == 0 | length(check.vars.pop) == 0){
     stop("Mão foram encontradas variáveis de cota em uma das bases.")
@@ -178,8 +216,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ############
   ### checando variavel cruzamento
 
-  check.cruz.svy <- names(select(df.svy,matches(reg.exp.cruz)))
-  check.cruz.pop <- names(select(df.pop,matches(reg.exp.cruz)))
+  check.cruz.svy <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.cruz)))
+  check.cruz.pop <- names(dplyr::select(df.pop,dplyr::matches(reg.exp.cruz)))
   var_cruz <- intersect(check.cruz.svy,check.cruz.pop)
   if (length(var_cruz) == 0){
     warning("Não será utilizada variável de cruzamento.")
@@ -194,7 +232,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ############
   ### checando id
 
-  var_id <- names(select(df.svy,matches(reg.exp.id)))
+  var_id <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.id)))
   if (length(var_id) != 1){
     stop("Variável ID não foi corretamente definida.")
   } else if (var_id == "") {
@@ -205,7 +243,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ############
   ### checando peso
 
-  var_wgt <- names(select(df.pop,matches(reg.exp.wgts)))
+  var_wgt <- names(dplyr::select(df.pop,dplyr::matches(reg.exp.wgts)))
   if (length(var_wgt) != 1){
     warning("Não será usada variável de ponderação pra definir os targets populacionais.")
   } else if (var_wgt == "") {
@@ -215,7 +253,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ############
   ### checando categs
 
-  df.categs <- check_categs(select(df.svy,one_of(vars_cota,var_cruz)),select(df.pop,one_of(vars_cota,var_cruz)))
+  df.categs <- check_categs(dplyr::select(df.svy,dplyr::one_of(vars_cota,var_cruz)),dplyr::select(df.pop,dplyr::one_of(vars_cota,var_cruz)))
 
   ####################################
   ############  TARGETS
@@ -223,46 +261,46 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
 
   #adding weights
   if (length(var_wgt) == 1){
-    df.pop <- df.pop %>% rename(peso=var_wgt)
+    df.pop <- df.pop %>% dplyr::rename(peso=var_wgt)
   } else {
     df.pop$peso <- 1
   }
 
   #adding cruzamento
   if (length(var_cruz) == 1){
-    df.pop <- df.pop %>% rename(cruz=var_cruz)
-    df.svy <- df.svy %>% rename(cruz=var_cruz)
+    df.pop <- df.pop %>% dplyr::rename(cruz=var_cruz)
+    df.svy <- df.svy %>% dplyr::rename(cruz=var_cruz)
   } else {
     df.pop$cruz <- "Total"
     df.svy$cruz <- "Total"
   }
 
-  #agregating pop counts
+  #agregating pop dplyr::counts
   targets <- df.pop %>%
-    select(one_of(vars_cota),cruz,peso) %>%
-    gather(var,categ,one_of(vars_cota),na.rm = TRUE) %>%
-    group_by(cruz,var,categ) %>%
-    summarise(
+    dplyr::select(dplyr::one_of(vars_cota),cruz,peso) %>%
+    tidyr::gather(var,categ,dplyr::one_of(vars_cota),na.rm = TRUE) %>%
+    dplyr::group_by(cruz,var,categ) %>%
+    dplyr::summarise(
       pop = sum(peso,na.rm = TRUE)
     )
 
   #adjusting for possible uneven NA
-  targets <- targets %>% group_by(cruz,var) %>% mutate(
+  targets <- targets %>% dplyr::group_by(cruz,var) %>% dplyr::mutate(
     pop.tot=sum(pop),
     pop = pop / pop.tot)
-  targets <- targets %>% group_by(cruz) %>% mutate(pop.tot=max(pop.tot))
-  targets <- targets %>% ungroup() %>% mutate(pop=pop * pop.tot) %>% select(-pop.tot)
+  targets <- targets %>% dplyr::group_by(cruz) %>% dplyr::mutate(pop.tot=max(pop.tot))
+  targets <- targets %>% ungroup() %>% dplyr::mutate(pop=pop * pop.tot) %>% dplyr::select(-pop.tot)
 
   ####################################
   ############  PONDERAÇÃO
   ####################################
 
   wgts <- sort(vars_cota)
-  sample <- map(wgts,~as.formula(paste0('~',.,'+cruz')))
+  sample <- purrr::map(wgts,~as.formula(paste0('~',.,'+cruz')))
 
-  targets <- targets %>% arrange(cruz,var)
+  targets <- targets %>% dplyr::arrange(cruz,var)
 
-  population <- map(wgts,function(x){
+  population <- purrr::map(wgts,function(x){
     df.svy <- targets[targets$var == x,]
     df.svy$var <- NULL
     df.svy[,x] <- df.svy$categ
@@ -271,11 +309,11 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   })
 
   #removing missings
-  df.comp <- df.svy %>% select(id,cruz,one_of(vars_cota)) %>% drop_na()
-  data.svy <- svydesign(id=~id,data = df.comp);
+  df.comp <- df.svy %>% dplyr::select(id,cruz,dplyr::one_of(vars_cota)) %>% tidyr::drop_na()
+  data.svy <- survey::svydesign(id=~id,data = df.comp);
   data.svy <- raking_svy(data.svy, sample=sample, population=population, control = list(maxit = 800))
   df.comp$weights <- weights(data.svy)
-  df.svy <- df.svy %>% left_join(select(df.comp,id,weights))
+  df.svy <- df.svy %>% dplyr::left_join(dplyr::select(df.comp,id,weights))
 
   #weight 1 for respondentes with missing (rescaled)
   df.svy$weights <- ifelse(is.na(df.svy$weights),1,df.svy$weights)
@@ -286,19 +324,19 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   ####################################
 
   check <- df.svy[,c('weights','cruz',wgts)]
-  check <- check %>% gather(var,categ,-weights,-cruz) %>% group_by(cruz,var,categ) %>% summarise(sample=n(),raw=n(),max.wgt = max(weights),min.wgt = min(weights),weights=sum(weights))
-  check <- full_join(check,targets,by=c('cruz','var','categ'))
+  check <- check %>% tidyr::gather(var,categ,-weights,-cruz) %>% dplyr::group_by(cruz,var,categ) %>% dplyr::summarise(sample=n(),raw=n(),max.wgt = max(weights),min.wgt = min(weights),weights=sum(weights))
+  check <- dplyr::full_join(check,targets,by=c('cruz','var','categ'))
   var.tot <- check$var[1]
-  check.tot <- check %>% ungroup() %>% filter(var == var.tot)
-  check <- check %>% mutate(
+  check.tot <- check %>% ungroup() %>% dplyr::filter(var == var.tot)
+  check <- check %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
     pop=round(100*pop/sum(pop,na.rm = TRUE),1),
     diff=weights - pop
   )
 
-  check.tot <- check.tot %>% group_by(cruz) %>% summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.)))
-  check.tot <- check.tot %>% ungroup() %>% mutate(
+  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.)))
+  check.tot <- check.tot %>% ungroup() %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
     pop=round(100*pop/sum(pop,na.rm = TRUE),1),
@@ -306,16 +344,16 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   )
   check <- check %>% bind_rows(check.tot)
 
-  check <- check %>% select(cruz:raw,weights:diff,ends_with('.wgt'))
-  check <- check %>% rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
+  check <- check %>% dplyr::select(cruz:raw,weights:diff,ends_with('.wgt'))
+  check <- check %>% dplyr::rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
   check <- as.data.frame(check)
-  check <- check %>% filter(Amostra != nrow(df.svy))
+  check <- check %>% dplyr::filter(Amostra != nrow(df.svy))
 
   if (length(var_cruz) == 0){
     check$Cruzamento <- NULL
   }
 
-  df.svy <- df.svy %>% select(-id,-cruz)
+  df.svy <- df.svy %>% dplyr::select(-id,-cruz)
   saida <- list(weights=df.svy,check.vars=df.categs,check.wgts=check)
 
   return(saida)
@@ -325,7 +363,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
 rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.id=NA){
   #' Rake sample to match population. Population input is a data frame of the targets.
   #'
-  #' This function rakes the sample to match the population counts. This algorithm has 3 basic steps:
+  #' This function rakes the sample to match the population dplyr::counts. This algorithm has 3 basic steps:
   #' \itemize{
   #'  \item \strong{Check variables}: checks that same variables with same labels are in both dataframes.
   #'  \item \strong{Rake sample}: Uses a adjusted raking algorithm adapted from
@@ -337,13 +375,13 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   #' @param df.svy The sample \emph{dataframe}, containing the variables to be used in the analysis (unique id,
   #' targets and cross-variable).
   #' @param targets The population targets \emph{dataframe}, This df should have the following variables:
-  #' var (variable names),categ (categories labels), pop (pop count) and the optional 'cruz' which identifies
-  #'  the crossing variable. Also, if there total pop counts are different for each variable, this wont be
+  #' var (variable names),categ (categories labels), pop (pop dplyr::count) and the optional 'cruz' which identifies
+  #'  the crossing variable. Also, if there total pop dplyr::counts are different for each variable, this wont be
   #'  corrected. The df layout is as follows:
   #' \itemize{
   #'  \item \strong{var}: column with the names of the target variables.
   #'  \item \strong{categ}: column with the labels of the categories.
-  #'  \item \strong{pop}: population count for each combination.
+  #'  \item \strong{pop}: population dplyr::count for each combination.
   #'  \item \strong{var_cruz[Optional]}: identifier of each category of the crossing variable. The name of the
   #'  column should match the name of the cross variable in the survey dataframe.
   #' }
@@ -362,12 +400,28 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   #'  \item \strong{check.wgts}\emph{(dataframe)}: comparison of all weights and population totals.
   #' }
   #' @examples
+  #' ##load data
+  #' # Survey data
+  #' data(svy)
+  #' # Population data
+  #' data(pop)
   #'
   #' ## Raking WITHOUT crossing variable:
-  #' weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+  #' targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+  #' targets <- targets %>% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
+  #' targets <- targets %>% tidyr::gather(var,categ,-regiao,-pop)
+  #' targets <- targets %>% dplyr::group_by(regiao,var,categ) %>% dplyr::summarise(pop=sum(pop))
+  #' targets.cruz <- targets %>% dplyr::filter(is.na(categ) == FALSE) %>% ungroup()
+  #' teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
   #'
   #' ## Raking WITH crossing variable:
-  #' weights <- rake_target(df.svy=dados,target=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+  #' targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+  #' targets <- targets %>% dplyr::select(pesoe,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
+  #' targets <- targets %>% tidyr::gather(var,categ,-pop)
+  #' targets <- targets %>% dplyr::group_by(var,categ) %>% dplyr::summarise(pop=sum(pop))
+  #' targets <- targets %>% dplyr::filter(is.na(categ) == FALSE)
+  #' teste.targets <- rake_target(df.svy=svy,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+
   reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
   reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
   reg.exp.id <- ifelse(is.na(reg.exp.id)," ",reg.exp.id)
@@ -387,7 +441,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 
   ############
   ### checando variaveis cota
-  check.vars.svy <- names(select(df.svy,matches(reg.exp.vars)))
+  check.vars.svy <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.vars)))
   check.vars.pop <- unique(targets$var)
   vars_cota <- intersect(check.vars.svy,check.vars.pop)
   if (length(check.vars.svy) == 0 | length(check.vars.pop) == 0){
@@ -406,8 +460,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 
   ############
   ### checando variavel cruzamento
-  check.cruz.svy <- names(select(df.svy,matches(reg.exp.cruz)))
-  check.cruz.pop <- names(select(targets,matches(reg.exp.cruz)))
+  check.cruz.svy <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.cruz)))
+  check.cruz.pop <- names(dplyr::select(targets,dplyr::matches(reg.exp.cruz)))
   var_cruz <- intersect(check.cruz.svy,check.cruz.pop)
   if (length(var_cruz) == 0) {
     if (length(reg.exp.cruz) > 0){
@@ -418,8 +472,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   } else if (length(var_cruz) > 1) {
     stop("Mais de uma variável de cruzamento encontrada na base.")
   } else {
-    df.svy <- df.svy %>% rename(cruz=var_cruz)
-    targets <- targets %>% rename(cruz=var_cruz)
+    df.svy <- df.svy %>% dplyr::rename(cruz=var_cruz)
+    targets <- targets %>% dplyr::rename(cruz=var_cruz)
     vals_df <- unique(df.svy$cruz)
     vals_target <- unique(targets$cruz)
     if(sum(vals_df %in% vals_target) != length(vals_df)){
@@ -434,7 +488,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   }
   ############
   ### checando id
-  var_id <- names(select(df.svy,matches(reg.exp.id)))
+  var_id <- names(dplyr::select(df.svy,dplyr::matches(reg.exp.id)))
   if (length(var_id) != 1){
     stop("Variável ID não foi corretamente definida.")
   } else if (var_id == "") {
@@ -444,16 +498,16 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 
   ############
   ### checando categs
-  df.categs <- check_targets(select(df.svy,one_of(vars_cota)),targets)
+  df.categs <- check_targets(dplyr::select(df.svy,dplyr::one_of(vars_cota)),targets)
 
   ####################################
   ############  PONDERAÇÃO
   ####################################
 
   wgts <- sort(vars_cota)
-  sample <- map(wgts,~as.formula(paste0('~',.,'+cruz')))
-  targets <- targets %>% arrange(cruz,var)
-  population <- map(wgts,function(x){
+  sample <- purrr::map(wgts,~as.formula(paste0('~',.,'+cruz')))
+  targets <- targets %>% dplyr::arrange(cruz,var)
+  population <- purrr::map(wgts,function(x){
     df.svy <- targets[targets$var == x,]
     df.svy$var <- NULL
     df.svy[,x] <- df.svy$categ
@@ -461,11 +515,11 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     return(df.svy)
   })
   #removing missings
-  df.comp <- df.svy %>% select(id,cruz,one_of(vars_cota)) %>% drop_na()
-  data.svy <- svydesign(id=~id,data = df.comp);
+  df.comp <- df.svy %>% dplyr::select(id,cruz,dplyr::one_of(vars_cota)) %>% tidyr::drop_na()
+  data.svy <- survey::svydesign(id=~id,data = df.comp);
   data.svy <- raking_svy(data.svy, sample=sample, population=population, control = list(maxit = 800))
   df.comp$weights <- weights(data.svy)
-  df.svy <- df.svy %>% left_join(select(df.comp,id,weights))
+  df.svy <- df.svy %>% dplyr::left_join(dplyr::select(df.comp,id,weights))
   #weight 1 for respondentes with missing (rescaled)
   df.svy$weights <- ifelse(is.na(df.svy$weights),1,df.svy$weights)
   df.svy$weights <- df.svy$weights * (nrow(df.svy) / sum(df.svy$weights))
@@ -475,19 +529,19 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   ####################################
 
   check <- df.svy[,c('weights','cruz',wgts)]
-  check <- check %>% gather(var,categ,-weights,-cruz) %>% group_by(cruz,var,categ) %>% summarise(sample=n(),raw=n(),max.wgt = max(weights),min.wgt = min(weights),weights=sum(weights))
-  check <- full_join(check,targets,by=c('cruz','var','categ'))
+  check <- check %>% tidyr::gather(var,categ,-weights,-cruz) %>% dplyr::group_by(cruz,var,categ) %>% dplyr::summarise(sample=n(),raw=n(),max.wgt = max(weights),min.wgt = min(weights),weights=sum(weights))
+  check <- dplyr::full_join(check,targets,by=c('cruz','var','categ'))
   var.tot <- check$var[1]
-  check.tot <- check %>% ungroup() %>% filter(var == var.tot)
-  check <- check %>% mutate(
+  check.tot <- check %>% ungroup() %>% dplyr::filter(var == var.tot)
+  check <- check %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
     pop=round(100*pop/sum(pop,na.rm = TRUE),1),
     diff=weights - pop
   )
 
-  check.tot <- check.tot %>% group_by(cruz) %>% summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.)))
-  check.tot <- check.tot %>% ungroup() %>% mutate(
+  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.)))
+  check.tot <- check.tot %>% ungroup() %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
     pop=round(100*pop/sum(pop,na.rm = TRUE),1),
@@ -495,15 +549,15 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   )
 
   check <- check %>% bind_rows(check.tot)
-  check <- check %>% select(cruz:raw,weights:diff,ends_with('.wgt'))
-  check <- check %>% rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
+  check <- check %>% dplyr::select(cruz:raw,weights:diff,ends_with('.wgt'))
+  check <- check %>% dplyr::rename(Cruzamento=cruz, Variavel=var, Categoria=categ, Amostra=sample, Sem_Ponderar=raw, Ponderado=weights, Populacao=pop,Diferenca=diff)
   check <- as.data.frame(check)
-  check <- check %>% filter(Amostra != nrow(df.svy))
+  check <- check %>% dplyr::filter(Amostra != nrow(df.svy))
 
   if (length(var_cruz) == 0){
     check$Cruzamento <- NULL
   }
-  df.svy <- df.svy %>% select(-id,-cruz)
+  df.svy <- df.svy %>% dplyr::select(-id,-cruz)
 
   saida <- list(weights=df.svy,check.vars=df.categs,check.wgts=check)
   return(saida)
@@ -512,26 +566,30 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 
 # ##dados:
 # ##E:\DADOS\CONSULTORIA\PESSOAS FÍSICAS\Paulo Cidade\Atitudes Financeiras - 03-12-2018\ponderação investidores - v1.R
-# dados <- dados %>% rename(regiao=REGIAO)
-# base <- base %>% rename(sexo_cota=sexo)
-# base$regiao <- str_replace(base$regiao,"Centro Oeste","Centro-Oeste")
+# svy <- dados %>% dplyr::rename(regiao=REGIAO)
+# svy <- svy %>% dplyr::select(numericalId,regiao,ends_with('_cota'))
+# pop <- base %>% dplyr::rename(sexo_cota=sexo)
+# pop$regiao <- str_replace(pop$regiao,"Centro Oeste","Centro-Oeste")
+# pop <- pop %>% dplyr::filter(RCLASSE2 %in% c("CLASSE A","Classe B2","Classe B1"),idade1 %in% 25:70)
+# pop <- pop %>% dplyr::select(nquest,pesoe,regiao,ends_with('_cota'))
+# devtools::use_data(svy,pop)
 #
-# teste.rake <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
-# teste.rake.cruz <- rake_df(df.svy=dados,df.pop=base,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+# teste.rake <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
+# teste.rake.cruz <- rake_df(df.svy=svy,df.pop=pop,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$",reg.exp.wgts="^pesoe$")
 #
-# targets <- base %>% filter(!is.na(classe_cota),!is.na(idade_cota))
-# targets <- targets %>% select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% rename(pop=pesoe)
-# targets <- targets %>% gather(var,categ,-regiao,-pop)
-# targets <- targets %>% group_by(regiao,var,categ) %>% summarise(pop=sum(pop))
-# targets.cruz <- targets %>% filter(is.na(categ) == FALSE) %>% ungroup()
-# teste.targets.cruz <- rake_target(df.svy=dados,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+# targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+# targets <- targets %>% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
+# targets <- targets %>% tidyr::gather(var,categ,-regiao,-pop)
+# targets <- targets %>% dplyr::group_by(regiao,var,categ) %>% dplyr::summarise(pop=sum(pop))
+# targets.cruz <- targets %>% dplyr::filter(is.na(categ) == FALSE) %>% ungroup()
+# teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
 #
-# targets <- base %>% filter(!is.na(classe_cota),!is.na(idade_cota))
-# targets <- targets %>% select(pesoe,sexo_cota,idade_cota,classe_cota) %>% rename(pop=pesoe)
-# targets <- targets %>% gather(var,categ,-pop)
-# targets <- targets %>% group_by(var,categ) %>% summarise(pop=sum(pop))
-# targets <- targets %>% filter(is.na(categ) == FALSE)
-# teste.targets <- rake_target(df.svy=dados,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+# targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+# targets <- targets %>% dplyr::select(pesoe,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
+# targets <- targets %>% tidyr::gather(var,categ,-pop)
+# targets <- targets %>% dplyr::group_by(var,categ) %>% dplyr::summarise(pop=sum(pop))
+# targets <- targets %>% dplyr::filter(is.na(categ) == FALSE)
+# teste.targets <- rake_target(df.svy=svy,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
 
 
 # ##################################################
@@ -576,22 +634,22 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # pnad.dir <- "E:\\DADOS\\Bancos de Dados\\PNAD\\Microdados PNAD 2014\\Dados"
 #
 # pnad <- get_spss(file=paste0(pnad.dir,"\\PNAD2014 - Pessoas - para R com cotas Paulo 2017.sav"))$sav
-# pnad <- pnad %>% select(V4729,area,reg,sexo_cota,V8005,V0232)
-# pnad <- pnad %>% rename(pop=V4729,cota_sexo=sexo_cota)
-# # pnad <- pnad %>% mutate(
+# pnad <- pnad %>% dplyr::select(V4729,area,reg,sexo_cota,V8005,V0232)
+# pnad <- pnad %>% dplyr::rename(pop=V4729,cota_sexo=sexo_cota)
+# # pnad <- pnad %>% dplyr::mutate(
 # #   fx_idade = cut(as.numeric(V8005),breaks = c(-1,11,16,21,36,56,71,150),labels = c('0-10','11-15','16-20','21-35','36-55','56-70','71+'))
 # # )
-# # pnad <- pnad %>% group_by(fx_idade) %>% summarise(
+# # pnad <- pnad %>% dplyr::group_by(fx_idade) %>% dplyr::summarise(
 # #   pop=sum(pop)
 # # )
-# # pnad <- pnad %>% ungroup() %>% mutate(
+# # pnad <- pnad %>% ungroup() %>% dplyr::mutate(
 # #   prop=round(100*pop/sum(pop),1)
 # # )
 # # write.table(pnad,'clipboard',sep='\t',row.names = FALSE,dec=".")
-# pnad <- pnad %>% filter(V8005 %in% 16:70,V0232=='Sim')
+# pnad <- pnad %>% dplyr::filter(V8005 %in% 16:70,V0232=='Sim')
 #
-# pnad.cota <- pnad %>% select(reg,area,pop) %>% gather(var,categ,area)
-# pnad.cota <- pnad.cota %>% group_by(reg,var,categ) %>% summarise(pop=sum(pop))
+# pnad.cota <- pnad %>% dplyr::select(reg,area,pop) %>% tidyr::gather(var,categ,area)
+# pnad.cota <- pnad.cota %>% dplyr::group_by(reg,var,categ) %>% dplyr::summarise(pop=sum(pop))
 #
 #
 #
@@ -602,7 +660,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # cetic.dom <- read_delim(file.cetic.dom,delim=';',locale = locale(decimal_mark = ","))
 # cetic.pes <- read_delim(file.cetic.pes,delim=';',locale = locale(decimal_mark = ","))
 #
-# pes <- cetic.pes %>% mutate(
+# pes <- cetic.pes %>% dplyr::mutate(
 #   cota_idade=cut(idade,breaks = c(15,20,35,55,70),labels = c('16-20','21-35','36-55','56-70')),
 #   cota_sexo=factor(sexo,levels=1:2,labels=c("Masculino","Feminino")),
 #   cota_edu=case_when(
@@ -614,20 +672,20 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #   cota_pea=ifelse(pea == 5,2,1),
 #   cota_pea=factor(cota_pea,levels=1:2,labels=c('Pea','Não Pea')),
 #   cota_internet=factor(C3,levels=c(1:3,99),labels=c("Há menos de 3 meses","Entre 3 meses e 12 meses","Mais de 12 meses atrás","Não se aplica"))
-# ) %>% select(id_domicilio,Peso,starts_with('cota'))
+# ) %>% dplyr::select(id_domicilio,Peso,starts_with('cota'))
 #
-# dom <- cetic.dom %>% mutate(
+# dom <- cetic.dom %>% dplyr::mutate(
 #   cod_regiao=factor(cod_regiao,levels=1:5,labels=c("Norte","Nordeste","Sudeste","Sul","Centro-Oeste")),
 #   classe_cb2015= factor(classe_cb2015,levels=1:4,labels=c("A","B","C","DE")),
 #   area=factor(area,levels=1:2,labels=c("Urbana","Rural")),
 #   Peso_dom=PESO
-# ) %>% select(id_domicilio,Peso_dom,cod_regiao,classe_cb2015,area) %>% rename(reg=cod_regiao,classe=classe_cb2015)
+# ) %>% dplyr::select(id_domicilio,Peso_dom,cod_regiao,classe_cb2015,area) %>% dplyr::rename(reg=cod_regiao,classe=classe_cb2015)
 #
-# df.cetic <- pes %>% left_join(dom)
-# df.cetic <- df.cetic %>% filter(cota_internet == "Há menos de 3 meses" & classe %in% c("A","B","C") & !is.na(cota_idade))
+# df.cetic <- pes %>% dplyr::left_join(dom)
+# df.cetic <- df.cetic %>% dplyr::filter(cota_internet == "Há menos de 3 meses" & classe %in% c("A","B","C") & !is.na(cota_idade))
 #
-# cetic.cota <- df.cetic %>% select(reg,Peso,classe,starts_with('cota'),-cota_internet) %>% gather(var,categ,-reg,-Peso)
-# cetic.cota <- cetic.cota %>% group_by(reg,var,categ) %>% summarise(pop=sum(Peso))
+# cetic.cota <- df.cetic %>% dplyr::select(reg,Peso,classe,starts_with('cota'),-cota_internet) %>% tidyr::gather(var,categ,-reg,-Peso)
+# cetic.cota <- cetic.cota %>% dplyr::group_by(reg,var,categ) %>% dplyr::summarise(pop=sum(Peso))
 #
 # total.cota <- bind_rows(pnad.cota,cetic.cota)
 # total.cota$var <- str_replace(total.cota$var,'area','cota_area')
@@ -643,9 +701,9 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # df <- spss$sav
 # df.vars <- spss$vars
 #
-# df <- df %>% select(numericalId,RegionRecode,Q1,Q2,Q3,RM_INTRecode,EduRecode,PEARecode)
-# df <- df %>% rename(reg=RegionRecode,cota_sexo=Q1,cota_idade=Q2,cota_classe=Q3,cota_area=RM_INTRecode,cota_edu=EduRecode,cota_pea=PEARecode)
-# df <- df %>% mutate(
+# df <- df %>% dplyr::select(numericalId,RegionRecode,Q1,Q2,Q3,RM_INTRecode,EduRecode,PEARecode)
+# df <- df %>% dplyr::rename(reg=RegionRecode,cota_sexo=Q1,cota_idade=Q2,cota_classe=Q3,cota_area=RM_INTRecode,cota_edu=EduRecode,cota_pea=PEARecode)
+# df <- df %>% dplyr::mutate(
 #   cota_sexo = factor(as.numeric(cota_sexo),levels=1:2,labels=levels(df.cetic$cota_sexo)),
 #   cota_idade = factor(as.numeric(cota_idade) - 1,levels=1:4,labels=levels(df.cetic$cota_idade)),
 #   cota_classe = case_when(
@@ -671,12 +729,12 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # ########################################
 # #Raking data frame
 #
-# wgts <- sort(names(df %>% select(starts_with('cota'))))
-# sample <- map(wgts,~as.formula(paste0('~',.,'+reg')))
+# wgts <- sort(names(df %>% dplyr::select(starts_with('cota'))))
+# sample <- purrr::map(wgts,~as.formula(paste0('~',.,'+reg')))
 #
-# targets <- total.cota %>% arrange(reg,var)
+# targets <- total.cota %>% dplyr::arrange(reg,var)
 #
-# population <- map(wgts,function(x){
+# population <- purrr::map(wgts,function(x){
 #   df <- targets[targets$var == x,]
 #   df$var <- NULL
 #   df[,x] <- df$categ
@@ -685,11 +743,11 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # })
 #
 # #removing missings
-# df.comp <- df %>% drop_na(starts_with('cota'))
-# data.svy <- svydesign(id=~numericalId,data = df.comp);
+# df.comp <- df %>% tidyr::drop_na(starts_with('cota'))
+# data.svy <- survey::svydesign(id=~numericalId,data = df.comp);
 # data.svy <- raking_svy(data.svy, sample=sample, population=population, control = list(maxit = 800))
 # df.comp$weights <- weights(data.svy)
-# df <- df %>% left_join(select(df.comp,numericalId,weights))
+# df <- df %>% dplyr::left_join(select(df.comp,numericalId,weights))
 #
 # #weight 1 for respondentes with missing (relative to the whole population)
 # #not an actal final weight of 1
@@ -700,15 +758,15 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 # #checks
 #
 # check <- df[,c('weights','reg',wgts)]
-# check <- check %>% gather(var,categ,-weights,-reg) %>% group_by(reg,var,categ) %>% summarise(sample=n(),raw=n(),weights=sum(weights))
-# check <- full_join(check,targets,by=c('reg','var','categ'))
-# check.tot <- check %>% filter(var == 'cota_sexo') %>% group_by(reg) %>% select(-var,-categ) %>% summarise_all(funs(sum(.,na.rm = TRUE)))
-# check.tot <- check.tot %>% rename(categ=reg)
+# check <- check %>% tidyr::gather(var,categ,-weights,-reg) %>% dplyr::group_by(reg,var,categ) %>% dplyr::summarise(sample=n(),raw=n(),weights=sum(weights))
+# check <- dplyr::full_join(check,targets,by=c('reg','var','categ'))
+# check.tot <- check %>% dplyr::filter(var == 'cota_sexo') %>% dplyr::group_by(reg) %>% dplyr::select(-var,-categ) %>% dplyr::summarise_all(funs(sum(.,na.rm = TRUE)))
+# check.tot <- check.tot %>% dplyr::rename(categ=reg)
 # check.tot$var <- 'Reg'
 # check <- check %>% bind_rows(check.tot)
-# check <- check %>% arrange(reg,var,categ)
-# check[,4:7] <- check[,4:7] %>% map_df(~ifelse(is.na(.),0,.))
-# check <- check %>% mutate(raw=round(100*raw/sum(raw,na.rm = TRUE),1),weights=round(100*weights/sum(weights,na.rm = TRUE),1),pop=round(100*pop/sum(pop,na.rm = TRUE),1))
+# check <- check %>% dplyr::arrange(reg,var,categ)
+# check[,4:7] <- check[,4:7] %>% purrr::map_df(~ifelse(is.na(.),0,.))
+# check <- check %>% dplyr::mutate(raw=round(100*raw/sum(raw,na.rm = TRUE),1),weights=round(100*weights/sum(weights,na.rm = TRUE),1),pop=round(100*pop/sum(pop,na.rm = TRUE),1))
 # check$diff <- check$weights - check$pop
 # check <- as.data.frame(check)
 
@@ -849,12 +907,12 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'   if (is.na(weight) == TRUE){
 #'     df$wgts <- 1
 #'   } else {
-#'     df <- df %>% select(one_of(vars),one_of(weight))
+#'     df <- df %>% dplyr::select(dplyr::one_of(vars),dplyr::one_of(weight))
 #'     df$wgts <- df[,weight]
 #'     df[,weight] <- NULL
 #'   }
 #'
-#'   df <- df %>% group_by_(.dots=vars) %>% summarise(wgts=sum(wgts),n=n())
+#'   df <- df %>% dplyr::group_by_(.dots=vars) %>% dplyr::summarise(wgts=sum(wgts),n=n())
 #'   return(df)
 #'
 #' }
@@ -875,13 +933,13 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'
 #' extract_names <- function(df.pop,vars){
 #'
-#'   df.names <- df.pop %>% select(one_of(vars),grp,strata)
-#'   df.names <- df.names %>% gather(var,categ,-grp,-strata)
-#'   df.names <- df.names %>% group_by(strata,grp,var,categ) %>% summarise(n=n()) %>% select(-n)
+#'   df.names <- df.pop %>% dplyr::select(dplyr::one_of(vars),grp,strata)
+#'   df.names <- df.names %>% tidyr::gather(var,categ,-grp,-strata)
+#'   df.names <- df.names %>% dplyr::group_by(strata,grp,var,categ) %>% dplyr::summarise(n=n()) %>% dplyr::select(-n)
 #'   df.names <- df.names[complete.cases(df.names),]
-#'   df.names <- df.names %>% group_by(strata,grp,var) %>% do(categs=paste(.$categ,collapse=";"))
-#'   df.names <- df.names %>% spread(var,categs)
-#'   df.names <- df.names %>% arrange(strata,grp)
+#'   df.names <- df.names %>% dplyr::group_by(strata,grp,var) %>% do(categs=paste(.$categ,collapse=";"))
+#'   df.names <- df.names %>% tidyr::spread(var,categs)
+#'   df.names <- df.names %>% dplyr::arrange(strata,grp)
 #'
 #'   return(df.names)
 #' }
@@ -950,16 +1008,16 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'   cells.svy <- create_cells_df(df=df.svy,vars=c(vars,dep))
 #'
 #'   #generate tree
-#'   fit.cells <- cells.svy %>% group_by(strata) %>% do(fit=create_tree(.,indep=indep.vars,dep=dep,minbucket = minbucket,cp = cp))
-#'   cells.svy <- map_df(fit.cells$fit,'cells.svy')
+#'   fit.cells <- cells.svy %>% dplyr::group_by(strata) %>% do(fit=create_tree(.,indep=indep.vars,dep=dep,minbucket = minbucket,cp = cp))
+#'   cells.svy <- purrr::map_df(fit.cells$fit,'cells.svy')
 #'
-#'   cells.pop.fit <- map2_df(fit.cells$strata,fit.cells$fit,
+#'   cells.pop.fit <- purrr::map2_df(fit.cells$strata,fit.cells$fit,
 #'                            function(x,y){
-#'                              df <- cells.pop %>% filter(strata == x);
+#'                              df <- cells.pop %>% dplyr::filter(strata == x);
 #'                              df <- replicate_tree(y$tree,df)
 #'                            })
-#'   cells.pop <- left_join(cells.pop,cells.pop.fit)
-#'   df.svy <- left_join(df.svy,select(cells.svy,-wgts,-n),by=c(vars,dep))
+#'   cells.pop <- dplyr::left_join(cells.pop,cells.pop.fit)
+#'   df.svy <- dplyr::left_join(df.svy,select(cells.svy,-wgts,-n),by=c(vars,dep))
 #'
 #'   #generate names
 #'   df.names <- extract_names(cells.svy,indep.vars)
@@ -996,25 +1054,25 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'   #############################
 #'   #targets
 #'
-#'   targets.pop <- cells.pop %>% ungroup() %>% select(strata,grp,wgts) %>% filter(is.na(grp)==FALSE)
-#'   targets.pop <- targets.pop %>% group_by(strata,grp) %>% summarise(wgts=sum(wgts))
-#'   targets.pop <- targets.pop %>% ungroup() %>% mutate(wgts=round(100*wgts/sum(wgts),1))
+#'   targets.pop <- cells.pop %>% ungroup() %>% dplyr::select(strata,grp,wgts) %>% dplyr::filter(is.na(grp)==FALSE)
+#'   targets.pop <- targets.pop %>% dplyr::group_by(strata,grp) %>% dplyr::summarise(wgts=sum(wgts))
+#'   targets.pop <- targets.pop %>% ungroup() %>% dplyr::mutate(wgts=round(100*wgts/sum(wgts),1))
 #'   targets.pop <- as.data.frame(targets.pop)
 #'   pop.tree <- xtabs(wgts~strata+grp,data=cells.pop)
 #'
-#'   targets.svy <- df.svy %>% ungroup() %>% select(strata,grp) %>% filter(is.na(grp)==FALSE)
-#'   targets.svy <- targets.svy %>% group_by(strata,grp) %>% summarise(n=n())
+#'   targets.svy <- df.svy %>% ungroup() %>% dplyr::select(strata,grp) %>% dplyr::filter(is.na(grp)==FALSE)
+#'   targets.svy <- targets.svy %>% dplyr::group_by(strata,grp) %>% dplyr::summarise(n=n())
 #'   missing.grps <- anti_join(targets.svy,targets.pop,by=c('strata','grp'))
-#'   missing.grps <- missing.grps %>% select(-n) %>% mutate(tira='missing grp')
+#'   missing.grps <- missing.grps %>% dplyr::select(-n) %>% dplyr::mutate(tira='missing grp')
 #'
 #'   #############################
 #'   #giving weight 1 to grps missing in the population
-#'   df.svy <- left_join(df.svy,missing.grps,by=c('strata','grp'))
+#'   df.svy <- dplyr::left_join(df.svy,missing.grps,by=c('strata','grp'))
 #'
 #'   #############################
 #'   #raking
 #'
-#'   data.svy <- svydesign(id=id.var,data = df.svy[is.na(df.svy$tira) == TRUE,]);
+#'   data.svy <- survey::svydesign(id=id.var,data = df.svy[is.na(df.svy$tira) == TRUE,]);
 #'   data.svy <- raking_svy(data.svy, sample=list(~strata+grp), population=list(pop.tree), control = list(maxit = 800))
 #'   df.svy$weights <- 1
 #'   df.svy$weights[is.na(df.svy$tira) == TRUE] <- weights(data.svy)
@@ -1024,9 +1082,9 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'   #checks
 #'
 #'   check <- df.svy[,c('weights','strata','grp')]
-#'   check <- check %>% group_by(strata,grp) %>% summarise(svy.sample=n(),svy.raw=n(),svy.wgts=sum(weights))
-#'   check <- full_join(check,rename(targets.pop,pop.wgts=wgts),by=c('strata','grp'))
-#'   check <- check %>% ungroup() %>% mutate(svy.raw=round(100*svy.raw/sum(svy.raw,na.rm = TRUE),1),svy.wgts=round(100*svy.wgts/sum(svy.wgts,na.rm = TRUE),1))
+#'   check <- check %>% dplyr::group_by(strata,grp) %>% dplyr::summarise(svy.sample=n(),svy.raw=n(),svy.wgts=sum(weights))
+#'   check <- dplyr::full_join(check,dplyr::rename(targets.pop,pop.wgts=wgts),by=c('strata','grp'))
+#'   check <- check %>% ungroup() %>% dplyr::mutate(svy.raw=round(100*svy.raw/sum(svy.raw,na.rm = TRUE),1),svy.wgts=round(100*svy.wgts/sum(svy.wgts,na.rm = TRUE),1))
 #'   check$diff <- check$svy.wgts - check$pop.wgts
 #'   check <- as.data.frame(check)
 #'
@@ -1054,8 +1112,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' reuters <- data.spss[,vars]
 #' reuters <- as_factor(reuters,only_labelled = TRUE,ordered=TRUE)
 #'
-#' #filter
-#' reuters <- reuters %>% filter(YEAR_WEEK %in% c("201642", "201643", "201644"))
+#' #dplyr::filter
+#' reuters <- reuters %>% dplyr::filter(YEAR_WEEK %in% c("201642", "201643", "201644"))
 #'
 #' reuters$date <- as.Date(reuters$INTEND)
 #' reuters$MONTH <- format(reuters$date,"%m%Y")
@@ -1089,7 +1147,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' betas <- read_sav(file.beta)
 #' betas <- as_factor(betas,only_labelled = TRUE,ordered=TRUE)
 #'
-#' reuters <- left_join(reuters,betas,by=c('STATE','EDU','SEX','AGE_GRP','RACE_','INCOME2','PARTY_ID_'))
+#' reuters <- dplyr::left_join(reuters,betas,by=c('STATE','EDU','SEX','AGE_GRP','RACE_','INCOME2','PARTY_ID_'))
 #' reuters$votoPD4 <- as.numeric(ifelse(as.numeric(reuters$PD4_NEW_1) > 10,0,reuters$PD4_NEW_1))
 #' reuters$lv <- reuters$intercept + reuters$votoPD4 * reuters$betaPD4
 #' reuters$lv <- exp(reuters$lv) / (1 + exp(reuters$lv))
@@ -1113,8 +1171,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' cps <- cps[,vars.cps]
 #' cps$STATE <- as.character(cps$GESTCEN)
 #' cps$GESTCEN <- NULL
-#' cps <- cps %>% rename(employed=employment_wgts,AGE_GRP=age_wgts,EDU=edu_wgts,RACE_=race_wgts,INCOME2=income_wgts,SEX=sex_wgts,GEODIV9=div9)
-#' #18+ filter
+#' cps <- cps %>% dplyr::rename(employed=employment_wgts,AGE_GRP=age_wgts,EDU=edu_wgts,RACE_=race_wgts,INCOME2=income_wgts,SEX=sex_wgts,GEODIV9=div9)
+#' #18+ dplyr::filter
 #' cps <- cps[cps$AGE_GRP != "NaN",]
 #' cps <- cps[cps$employed != "NaN",]
 #' cps <- droplevels(cps)
@@ -1169,10 +1227,10 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' trees <- rake.chaid$trees
 #' grps.descr <- rake.chaid$grps
 #'
-#' df.svy <- df.svy %>% rename(weights_chaid=weights)
+#' df.svy <- df.svy %>% dplyr::rename(weights_chaid=weights)
 #'
 #' #NATIONAL
-#' reuters.wgts <- svydesign(id=~ID_REUTERS,data = df.svy);
+#' reuters.wgts <- survey::svydesign(id=~ID_REUTERS,data = df.svy);
 #' saida1 <- raking_svy(reuters.wgts, sample=list(~SEX,~AGE_GRP,~EDU,~RACE_,~metro,~GEODIV9), population=list(pop.sex,pop.age,pop.edu,pop.race,pop.metro,pop.geo9), control = list(maxit = 800))
 #' pesos1 <- weights(saida1)
 #' AAPOR_WEIGHTS <- dim(df.svy)[1] * (pesos1 / sum(pesos1))
@@ -1191,29 +1249,29 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' ############################################################
 #' ############################################################
 #'
-#' check.dados <- select(df.svy,STATE,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,weights_nat,weights_state) %>% gather(var,categ,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro)
-#' check.dados <- check.dados %>% group_by(STATE,var,categ) %>% summarise(new.weights = sum(weights_nat,na.rm = TRUE),state.weights = sum(weights_state,na.rm = TRUE),n = n())
-#' check.tot <- check.dados %>% group_by(var,categ) %>% summarise(new.weights = sum(new.weights,na.rm = TRUE),n = sum(n))
-#' check.tot <- check.tot %>% group_by(var) %>% mutate(weights = round(100 *new.weights / sum(new.weights))) %>% select(-new.weights)
+#' check.dados <- dplyr::select(df.svy,STATE,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,weights_nat,weights_state) %>% tidyr::gather(var,categ,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro)
+#' check.dados <- check.dados %>% dplyr::group_by(STATE,var,categ) %>% dplyr::summarise(new.weights = sum(weights_nat,na.rm = TRUE),state.weights = sum(weights_state,na.rm = TRUE),n = n())
+#' check.tot <- check.dados %>% dplyr::group_by(var,categ) %>% dplyr::summarise(new.weights = sum(new.weights,na.rm = TRUE),n = sum(n))
+#' check.tot <- check.tot %>% dplyr::group_by(var) %>% dplyr::mutate(weights = round(100 *new.weights / sum(new.weights))) %>% dplyr::select(-new.weights)
 #' check.tot$STATE <- "US"
 #' check.tot$type <- "NATIONAL WEIGHTS"
-#' check.dados <- check.dados %>% group_by(STATE,var) %>% mutate(weights = round(100 *state.weights / sum(state.weights))) %>% select(-new.weights,-state.weights)
+#' check.dados <- check.dados %>% dplyr::group_by(STATE,var) %>% dplyr::mutate(weights = round(100 *state.weights / sum(state.weights))) %>% dplyr::select(-new.weights,-state.weights)
 #' check.dados$type <- "STATE WEIGHTS"
 #' check.dados <- bind_rows(check.tot,check.dados)
 #'
-#' check.cps <- select(cps,STATE,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,PWSSWGT) %>% gather(var,categ,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,na.rm = TRUE)
-#' check.cps <- check.cps %>% group_by(STATE,var,categ) %>% summarise(cps = sum(PWSSWGT))
-#' check.cpstot <- check.cps %>% group_by(var,categ) %>% summarise(cps = sum(cps))
-#' check.cpstot <- check.cpstot %>% group_by(var) %>% mutate(cps = round(100 * cps / sum(cps)))
+#' check.cps <- dplyr::select(cps,STATE,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,PWSSWGT) %>% tidyr::gather(var,categ,SEX,AGE_GRP,EDU,RACE_,GEODIV9,metro,na.rm = TRUE)
+#' check.cps <- check.cps %>% dplyr::group_by(STATE,var,categ) %>% dplyr::summarise(cps = sum(PWSSWGT))
+#' check.cpstot <- check.cps %>% dplyr::group_by(var,categ) %>% dplyr::summarise(cps = sum(cps))
+#' check.cpstot <- check.cpstot %>% dplyr::group_by(var) %>% dplyr::mutate(cps = round(100 * cps / sum(cps)))
 #' check.cpstot$STATE <- "US"
 #' check.cpstot$type <-"NATIONAL WEIGHTS"
-#' check.cps <- check.cps %>% group_by(STATE,var) %>% mutate(cps = round(100 * cps / sum(cps)))
+#' check.cps <- check.cps %>% dplyr::group_by(STATE,var) %>% dplyr::mutate(cps = round(100 * cps / sum(cps)))
 #' check.cps$type <- "STATE WEIGHTS"
 #' check.cps <- bind_rows(check.cpstot,check.cps)
 #'
-#' check.final <- left_join(check.dados,check.cps,by=c('STATE','type','var','categ'))
+#' check.final <- dplyr::left_join(check.dados,check.cps,by=c('STATE','type','var','categ'))
 #' check.final$dif <- round(check.final$weights - check.final$cps,2)
-#' check.final <- check.final %>% select(type,STATE,var,categ,n,cps,weights,dif)
+#' check.final <- check.final %>% dplyr::select(type,STATE,var,categ,n,cps,weights,dif)
 #'
 #' ##########################################
 #' ##########################################
@@ -1226,14 +1284,14 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' load(file.gen2016)
 #' gen.2016 <- results.US2016.gen
 #' gen.2016$lead <- 100*((gen.2016$Clinton / rowSums(gen.2016[,-c(1,2)])) - (gen.2016$Trump / rowSums(gen.2016[,-c(1,2)])))
-#' gen.2016 <- gen.2016 %>% select(state,lead)
-#' gen.2016 <- gen.2016 %>% rename(STATE=state)
+#' gen.2016 <- gen.2016 %>% dplyr::select(state,lead)
+#' gen.2016 <- gen.2016 %>% dplyr::rename(STATE=state)
 #'
 #' ### Turnout
 #'
 #' turn2016 <- read.xlsx(file.turn,sheetIndex = 1)
 #' turn2016$turnout <- rowMeans(turn2016[,c('vep','vap')])
-#' df.svy <- left_join(df.svy,select(turn2016,STATE,turnout),by='STATE')
+#' df.svy <- dplyr::left_join(df.svy,select(turn2016,STATE,turnout),by='STATE')
 #'
 #' ############################################################
 #' ############################################################
@@ -1242,27 +1300,27 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' ############################################################
 #'
 #' #Cut point defined at state level
-#' df.reuters <- df.svy  %>% gather(wgts.type,weights,starts_with('weights'))
-#' df.reuters <- df.reuters %>% arrange(STATE,wgts.type,-lv)
-#' df.reuters <- df.reuters %>% group_by(STATE,wgts.type) %>% mutate(rank.st = cumsum(weights) / sum(weights))
+#' df.reuters <- df.svy  %>% tidyr::gather(wgts.type,weights,starts_with('weights'))
+#' df.reuters <- df.reuters %>% dplyr::arrange(STATE,wgts.type,-lv)
+#' df.reuters <- df.reuters %>% dplyr::group_by(STATE,wgts.type) %>% dplyr::mutate(rank.st = cumsum(weights) / sum(weights))
 #' df.reuters$cut.lv <- ifelse(df.reuters$rank.st <= df.reuters$turnout,1,0)
 #'
-#' #filtering LV
-#' df.reuters <- df.reuters %>% filter(cut.lv == 1)
+#' #dplyr::filtering LV
+#' df.reuters <- df.reuters %>% dplyr::filter(cut.lv == 1)
 #'
 #' #vote estimate
-#' df.reuters <- df.reuters %>% group_by(STATE,wgts.type) %>% summarise(lead=100*weighted.mean(lead,weights))
-#' df.reuters <- df.reuters %>% spread(wgts.type,lead)
-#' df.reuters <- left_join(df.reuters,gen.2016,by='STATE')
-#' df.reuters <- df.reuters %>% rename(election=lead)
+#' df.reuters <- df.reuters %>% dplyr::group_by(STATE,wgts.type) %>% dplyr::summarise(lead=100*weighted.mean(lead,weights))
+#' df.reuters <- df.reuters %>% tidyr::spread(wgts.type,lead)
+#' df.reuters <- dplyr::left_join(df.reuters,gen.2016,by='STATE')
+#' df.reuters <- df.reuters %>% dplyr::rename(election=lead)
 #' df.reuters$dif_chaid <- abs(df.reuters$weights_chaid - df.reuters$election)
 #' df.reuters$dif_nat <- abs(df.reuters$weights_nat - df.reuters$election)
 #' df.reuters$dif_state <- abs(df.reuters$weights_state - df.reuters$election)
 #'
-#' avg.error <- df.reuters %>% ungroup() %>% select(starts_with('dif')) %>% summarise_all(funs(mean(.)))
+#' avg.error <- df.reuters %>% ungroup() %>% dplyr::select(starts_with('dif')) %>% dplyr::summarise_all(funs(mean(.)))
 #'
-#' df.reuters <- df.reuters %>% select(-starts_with('dif')) %>% gather(estimate,lead,-STATE)
-#' df.error <- df.reuters %>% spread(estimate,lead)
+#' df.reuters <- df.reuters %>% dplyr::select(-starts_with('dif')) %>% tidyr::gather(estimate,lead,-STATE)
+#' df.error <- df.reuters %>% tidyr::spread(estimate,lead)
 #'
 #' #################
 #' ### graph
@@ -1277,7 +1335,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #'
 #' pdf(paste0(dir,"\\Tree plots from Chaid-Raking.pdf"),paper = 'a4r', width = 12)
 #'
-#' nada <- map(trees$fit,~prp(.$tree, faclen = 0, cex = 0.8, extra = 1, main=.$cells.svy$strata[[1]]))
+#' nada <- purrr::map(trees$fit,~prp(.$tree, faclen = 0, cex = 0.8, extra = 1, main=.$cells.svy$strata[[1]]))
 #'
 #' dev.off()
 #'
@@ -1285,7 +1343,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
 #' #################
 #' ### estados com problemas para checar
 #'
-#' df.key.states <- df.error %>% filter(STATE %in% c('OH','WI','FL','NC','SC'))
+#' df.key.states <- df.error %>% dplyr::filter(STATE %in% c('OH','WI','FL','NC','SC'))
 #'
 #' # 1.       Ohio
 #' # 2.       Wisconsin
