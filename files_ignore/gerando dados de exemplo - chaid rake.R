@@ -46,6 +46,7 @@ file.gen2016=paste0(dir.gen2016,"\\US2016 Results Gen.RData")
 
  #dplyr::filter
  reuters <- reuters %>% dplyr::filter(YEAR_WEEK %in% c("201642", "201643", "201644"))
+ reuters$RESPID <- 1:nrow(reuters)
 
  reuters$date <- as.Date(reuters$INTEND)
  reuters$MONTH <- format(reuters$date,"%m%Y")

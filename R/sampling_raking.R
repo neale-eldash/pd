@@ -327,6 +327,9 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
     stop("Variável ID não foi corretamente definida.")
   }
   df.svy[,"id"] <- df.svy[,var_id]
+  if (unique(df.svy$id) < nrow(df.svy)){
+    stop("Variável ID tem duplicidade.")
+  }
 
   ############
   ### checando peso
@@ -584,6 +587,9 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     stop("Variável ID não foi corretamente definida.")
   }
   df.svy[,"id"] <- df.svy[,var_id]
+  if (unique(df.svy$id) < nrow(df.svy)){
+    stop("Variável ID tem duplicidade.")
+  }
 
   ############
   ### checando categs
