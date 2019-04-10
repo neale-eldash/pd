@@ -39,7 +39,7 @@ get_spss <- function(file){
   spss <- as_factor(spss,only_labelled = TRUE,ordered=TRUE)
   vars <- df_summary(spss)
 
-  return(list(sav=spss,vars=df.vars))
+  return(list(sav=spss,vars=vars))
 }
 
 write_spss <- function(df,file,max=255){

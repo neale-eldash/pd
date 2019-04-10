@@ -15,7 +15,9 @@ Depends: tidyverse,
          sampling,
          openxlsx,
          rmarkdown,
-         tableHTML
+         tableHTML,
+         rpart,
+         rpart.plot
 RoxygenNote: 6.1.0
 Suggests: knitr,
     testthat
