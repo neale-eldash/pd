@@ -36,9 +36,9 @@ de pontos por estrato.
 data(svy)
 df <- svy \%>\% group_by(regiao) \%>\% summarise(pop=n()) \%>\% rename(strata=regiao)
 
-# Sem definir um mÃ­nimo de pontos por estrato
+# Sem definir um minimo de pontos por estrato
 allocate_pts(df,pts = 20,min.pts = 0)
 
-Definindo pelo menos 2 pontos por estrato
+#Definindo pelo menos 2 pontos por estrato
 allocate_pts(df,pts = 20,min.pts = 2)
 }
