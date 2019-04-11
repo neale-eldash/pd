@@ -82,6 +82,96 @@
 #'  @source \url{https://www.census.gov/programs-surveys/cps.html}
 "cps"
 
+
+##################################################
+##################################################
+##################################################
+################ Amostragem
+##################################################
+##################################################
+##################################################
+
+allocate_pts <- function(df,pts,min.pts){
+  #df containg column with pop counts named pop
+  #df containg column with strata names named strata
+
+  #' Distribuir amostra proporcionalmentem, levando em consideração o arredondamento.
+  #'
+  #' Essa função distribui a amostra proporcionalmente a população, controlando o arredondamento de forma
+  #' que o menor erro de arredondamento possível seja cometido. Ela também permite definir um número mínimo
+  #' de pontos por estrato.
+  #'
+  #' @param df.pts \emph{Dataframe} com a população de cada estrato. Nessa base devem haver pelo menos duas
+  #'  colunas. Uma chamada strata, com os nomes dos estratos, e outra chamada pop, com a contagem populacional de cada estrato.
+  #' @param min.pts \emph{Inteiro} definindo o número mínimo de casos para um estrato
+  #' @return Um \emph{Dataframe} com os dados originais, além do tamanho da amostra e algumas informações amostrais.
+  #' @examples
+  #'
+  #' sample <- allocate_pts(df,pts,min.pts)
+
+  df$ordem_show <- 1:nrow(df)
+  df.zero <- df %>% select(strata,pop,ordem_show) %>% filter(pop == 0)
+
+  df <- df %>% filter(pop > 0)
+  df <- df %>% mutate(
+    size.prop = pop/sum(pop),
+    pts.prop = round(size.prop*pts,2),
+    pts.arred = round(pts.prop,0),
+    pts = ifelse(pts.arred < min.pts,min.pts,pts.arred),
+    pts.extra = pts-pts.prop
+  )
+
+  #aux.n <- ceiling((sum(df$pts) - pts) / min.pts)
+  aux.n <- sum(df$pts) - pts
+  df$pts.fim <- df$pts
+  if (aux.n < 0 & abs(aux.n) <= nrow(df)){
+
+    df <- df %>% arrange(pts.extra)
+    df$pts.fim[1:abs(aux.n)] <- df$pts.fim[1:abs(aux.n)] +1
+
+  } else if (aux.n < 0 & abs(aux.n) > nrow(df)){
+    #se tem menos linhas do que pontos vai distribuir proporionalmente
+    #ao número de pontos sobrando (com relação ao min.pts)
+    df$sobra <- df$pts.fim - min.pts
+    df$pts.fim <- df$pts.fim + round(aux.n * (df$sobra / sum(df$sobra)),0)
+    df$pts.fim[1] <- df$pts.fim[1] + (sum(df$pts.fim) - pts)
+    #warning("Alocação pode ter desbalanceado a amostra!")
+
+  } else if (aux.n > 0){
+
+    df <- df %>% arrange(desc(pts.extra))
+    df$pts.status <- ifelse(df$pts.fim - 1 >= min.pts,TRUE,FALSE)
+    df$acum.status <- cumsum(df$pts.status)
+
+    if (max(df$acum.status) >= aux.n){
+      df$pts.fim <- ifelse(df$acum.status <= aux.n & df$pts.status == TRUE,df$pts.fim - 1,df$pts.fim)
+    } else if((max(df$acum.status) < aux.n) & max(df$acum.status) > 0) {
+      #se tem menos linhas do que pontos vai distribuir proporionalmente
+      #ao número de pontos sobrando (com relação ao min.pts)
+      df$sobra <- df$pts.fim - min.pts
+      df$pts.fim <- df$pts.fim + round(aux.n * (df$sobra / sum(df$sobra)),0)
+      df$pts.fim[1] <- df$pts.fim[1] + (sum(df$pts.fim) - pts)
+      #warning("Alocação pode ter desbalanceado a amostra!")
+    }
+  }
+
+  if(nrow(df.zero) > 0){
+    df <- df %>% bind_rows(df.zero)
+    df <- df %>% mutate_at(vars(-strata),funs(ifelse(is.na(.),0,.)))
+  }
+
+  if ((sum((df$pts.fim < min.pts) & (df$pop > 0)) > 0) | (sum(df$pts.fim) > pts)){
+    stop("Não foi possível alocar corretamente os pts da amostra!!!")
+  }
+
+  df <- df %>% arrange(ordem_show)
+  df <- df %>% select(strata:pts.arred,pts.fim,ordem_show,-pts)
+  df <- df %>% rename(pts=pts.fim)
+
+  return(df)
+
+}
+
 ##################################################
 ##################################################
 ##################################################
