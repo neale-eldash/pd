@@ -103,10 +103,25 @@ allocate_pts <- function(df,pts,min.pts){
   #'   de cada estrato. Colunas extra serão ignoradas, porém mantidas.
   #' @param pts \emph{Inteiro} definindo o número de entevistas (ou pontos) a serem distribuídos.
   #' @param min.pts \emph{Inteiro} definindo o número mínimo de casos por estrato.
-  #' @return Um \emph{Dataframe} com os dados originais, além do tamanho da amostra e algumas informações amostrais.
+  #' @return Um \emph{Dataframe} com os dados originais, além do tamanho da amostra e algumas informações
+  #' amostrais:
+  #' \itemize{
+  #'  \item \strong{ordem_show} \emph{(inteiro)}: ordem original dos estratos.
+  #'  \item \strong{size.prop} \emph{(real)}: Tamanho relativo de cada estrato.
+  #'  \item \strong{pts.prop} \emph{(real)}: Distribuição da amostra proporcional, sem arredondamento.
+  #'  \item \strong{pts.arred} \emph{(Inteiro)}: Distribuição da amostra proporcional, com arredondamento.
+  #'  \item \strong{pts} \emph{(Inteiro)}: Distribuição da amostra proporcional, com ajustes finais.
+  #' }
   #' @examples
   #'
-  #' sample <- allocate_pts(df,pts,min.pts)
+  #' data(svy)
+  #' df <- svy %>% group_by(regiao) %>% summarise(pop=n()) %>% rename(strata=regiao)
+  #'
+  #' # Sem definir um mínimo de pontos por estrato
+  #' allocate_pts(df,pts = 20,min.pts = 0)
+  #'
+  #' Definindo pelo menos 2 pontos por estrato
+  #' allocate_pts(df,pts = 20,min.pts = 2)
 
   df$ordem_show <- 1:nrow(df)
   df.zero <- df %>% select(strata,pop,ordem_show) %>% filter(pop == 0)
