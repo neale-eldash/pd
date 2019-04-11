@@ -9,8 +9,6 @@ xlsx_table <- function(df,wb,sheet,tit.sep = NA,lin.inic = 1,col.inic = 1,width.
   #' @param sheet A \emph{intenger} identifying in which sheet index to create the table.
   #' @param tit.sep [Optional] A \emph{regular expression} identifying how variable names and values are separated in
   #' the dataframe title. For example, in "variable_category" the tit.sep parameter would be "_".
-  #' variables are crossed by (usually reagion). The target variables will match the population within each label of
-  #' the crossing variable. These variables should exist in both the sample and population dataframes.
   #' @param lin.inic [Optional] A \emph{integer} identifying in which line to insert the table.
   #' @param col.inic [Optional] A \emph{integer} identifying in which column to insert the table.
   #' @param width.first [Optional] A \emph{integer} identifying the width of the first column in the table.

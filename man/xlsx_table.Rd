@@ -15,9 +15,7 @@ xlsx_table(df, wb, sheet, tit.sep = NA, lin.inic = 1, col.inic = 1,
 \item{sheet}{A \emph{intenger} identifying in which sheet index to create the table.}
 
 \item{tit.sep}{[Optional] A \emph{regular expression} identifying how variable names and values are separated in
-the dataframe title. For example, in "variable_category" the tit.sep parameter would be "_".
-variables are crossed by (usually reagion). The target variables will match the population within each label of
-the crossing variable. These variables should exist in both the sample and population dataframes.}
+the dataframe title. For example, in "variable_category" the tit.sep parameter would be "_".}
 
 \item{lin.inic}{[Optional] A \emph{integer} identifying in which line to insert the table.}
 
