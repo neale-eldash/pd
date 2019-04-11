@@ -92,18 +92,17 @@
 ##################################################
 
 allocate_pts <- function(df,pts,min.pts){
-  #df containg column with pop counts named pop
-  #df containg column with strata names named strata
-
   #' Distribuir amostra proporcionalmentem, levando em consideração o arredondamento.
   #'
   #' Essa função distribui a amostra proporcionalmente a população, controlando o arredondamento de forma
   #' que o menor erro de arredondamento possível seja cometido. Ela também permite definir um número mínimo
   #' de pontos por estrato.
   #'
-  #' @param df.pts \emph{Dataframe} com a população de cada estrato. Nessa base devem haver pelo menos duas
-  #'  colunas. Uma chamada strata, com os nomes dos estratos, e outra chamada pop, com a contagem populacional de cada estrato.
-  #' @param min.pts \emph{Inteiro} definindo o número mínimo de casos para um estrato
+  #' @param df \emph{Dataframe} com a população de cada estrato. Nessa base devem haver pelo menos duas
+  #'  colunas. Uma chamada strata, com os nomes dos estratos, e outra chamada pop, com a contagem populacional
+  #'   de cada estrato. Colunas extra serão ignoradas, porém mantidas.
+  #' @param pts \emph{Inteiro} definindo o número de entevistas (ou pontos) a serem distribuídos.
+  #' @param min.pts \emph{Inteiro} definindo o número mínimo de casos por estrato.
   #' @return Um \emph{Dataframe} com os dados originais, além do tamanho da amostra e algumas informações amostrais.
   #' @examples
   #'

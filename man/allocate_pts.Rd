@@ -7,10 +7,13 @@
 allocate_pts(df, pts, min.pts)
 }
 \arguments{
-\item{min.pts}{\emph{Inteiro} definindo o número mínimo de casos para um estrato}
+\item{df}{\emph{Dataframe} com a população de cada estrato. Nessa base devem haver pelo menos duas
+colunas. Uma chamada strata, com os nomes dos estratos, e outra chamada pop, com a contagem populacional
+ de cada estrato. Colunas extra serão ignoradas, porém mantidas.}
 
-\item{df.pts}{\emph{Dataframe} com a população de cada estrato. Nessa base devem haver pelo menos duas
-colunas. Uma chamada strata, com os nomes dos estratos, e outra chamada pop, com a contagem populacional de cada estrato.}
+\item{pts}{\emph{Inteiro} definindo o número de entevistas (ou pontos) a serem distribuídos.}
+
+\item{min.pts}{\emph{Inteiro} definindo o número mínimo de casos por estrato.}
 }
 \value{
 Um \emph{Dataframe} com os dados originais, além do tamanho da amostra e algumas informações amostrais.
