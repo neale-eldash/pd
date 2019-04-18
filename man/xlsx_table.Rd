@@ -5,7 +5,8 @@
 \title{Generate nice formated tables in excel.}
 \usage{
 xlsx_table(df, wb, sheet, tit.sep = NA, lin.inic = 1, col.inic = 1,
-  width.first = 30, width.cols = 20)
+  width.first = 30, width.cols = 20, title_font = "blue1",
+  title_bg = "lightcyan", col1_font = "black", col1_bg = "lightgrey")
 }
 \arguments{
 \item{df}{The \emph{dataframe} to be exported.}
@@ -24,6 +25,14 @@ the dataframe title. For example, in "variable_category" the tit.sep parameter w
 \item{width.first}{[Optional] A \emph{integer} identifying the width of the first column in the table.}
 
 \item{width.cols}{[Optional] A \emph{integer} identifying  the width of the other columns in the table.}
+
+\item{title_font}{[Optional] A \emph{character} identifying the color of the title font.}
+
+\item{title_bg}{[Optional] A \emph{character} identifying the color of the title background.}
+
+\item{col1_font}{[Optional] A \emph{character} identifying the color of the first column's font.}
+
+\item{col1_bg}{[Optional] A \emph{character} identifying the color of the first column's background.}
 }
 \value{
 \emph{NULL}: the table is written to the provided workbook, no object is returned.

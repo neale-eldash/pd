@@ -14,6 +14,10 @@ xlsx_table <- function(df,wb,sheet,tit.sep = NA,lin.inic = 1,col.inic = 1,width.
   #' @param col.inic [Optional] A \emph{integer} identifying in which column to insert the table.
   #' @param width.first [Optional] A \emph{integer} identifying the width of the first column in the table.
   #' @param width.cols [Optional] A \emph{integer} identifying  the width of the other columns in the table.
+  #' @param title_font [Optional] A \emph{character} identifying the color of the title font.
+  #' @param title_bg [Optional] A \emph{character} identifying the color of the title background.
+  #' @param col1_font [Optional] A \emph{character} identifying the color of the first column's font.
+  #' @param col1_bg [Optional] A \emph{character} identifying the color of the first column's background.
   #' @return \emph{NULL}: the table is written to the provided workbook, no object is returned.
   #' @examples
   #'
