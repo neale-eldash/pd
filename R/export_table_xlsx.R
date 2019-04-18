@@ -1,4 +1,5 @@
-xlsx_table <- function(df,wb,sheet,tit.sep = NA,lin.inic = 1,col.inic = 1,width.first = 30,width.cols = 20){
+xlsx_table <- function(df,wb,sheet,tit.sep = NA,lin.inic = 1,col.inic = 1,width.first = 30,width.cols = 20,
+                       title_font='blue1',title_bg="lightcyan",col1_font='black',col1_bg="lightgrey"){
   #' Generate nice formated tables in excel.
   #'
   #' This function exports a dataframe to a formated table in excel. Format parameters are still hard-coded
@@ -40,14 +41,14 @@ xlsx_table <- function(df,wb,sheet,tit.sep = NA,lin.inic = 1,col.inic = 1,width.
 
   ### estilos
 
-  style_title_top <- createStyle(fontColour='blue1',halign = 'center', valign = 'center', textDecoration = 'bold',
-                                 fgFill="lightcyan",wrapText = TRUE,border=c('top','bottom','left','right'),
+  style_title_top <- createStyle(fontColour=title_font,halign = 'center', valign = 'center', textDecoration = 'bold',
+                                 fgFill=title_bg,wrapText = TRUE,border=c('top','bottom','left','right'),
                                  borderStyle = c('medium','medium','medium','medium'))
-  style_title_bot <- createStyle(fontColour='blue1',halign = 'center', valign = 'center', textDecoration = 'bold',
-                                 fgFill="lightcyan",wrapText = TRUE,border=c('top','bottom','left','right'),
+  style_title_bot <- createStyle(fontColour=title_font,halign = 'center', valign = 'center', textDecoration = 'bold',
+                                 fgFill=title_bg,wrapText = TRUE,border=c('top','bottom','left','right'),
                                  borderStyle = c('medium','double','medium','medium'))
-  style_fisrt_column <- createStyle(fontColour='black',halign = 'left', valign = 'center', textDecoration = 'bold',
-                                    fgFill="lightgrey",wrapText = TRUE, border=c('right'), borderStyle = c('thin'))
+  style_fisrt_column <- createStyle(fontColour=col1_font,halign = 'left', valign = 'center', textDecoration = 'bold',
+                                    fgFill=col1_bg,wrapText = TRUE, border=c('right'), borderStyle = c('thin'))
   style_last_column <- createStyle(fontColour='black',halign = 'left', valign = 'center', textDecoration = NULL,
                                    wrapText = TRUE, border=c('left'), borderStyle = c('thin'))
   style_data <- createStyle(fontColour='black',halign = 'center', valign = 'center', textDecoration = NULL,
