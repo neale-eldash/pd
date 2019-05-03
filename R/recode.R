@@ -41,7 +41,7 @@ dummy_all <- function(df=NULL,reg.exp=NULL,keep_all=TRUE){
   #dplyr::selecting variables
   df <- df %>% dplyr::select(matches(reg.exp))
   inds <- sapply(df,class) %in% c("factor","character")
-  df <- df[,inds]
+  df <- df[,inds,drop=FALSE]
   if (sum(inds) > 0) warning("Only Factor and Character variables are kept!!!")
   if (sum(inds) == 0) stop("No variable of the specified type's were found in the data frame!")
 
