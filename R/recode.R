@@ -176,6 +176,13 @@ tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
 ##### edited View function
 
 View_ <- function(df){
+  #' Invoke a Data Viewer, but removes list-columns so that R doesn't crash.
+  #'
+  #' @param df The dataframe to be visualized.
+  #' @return Invisible \emph{NULL}. The functions puts up a window and returns immediately: the window can be closed via its controls or menus.
+  #'
+  #' @examples
+  #' View_(df)
 
   var.change <- names(df)[purrr:::map_chr(df,~class(.)) == "list"]
   df[,var.change] <- "list (hidden)"
