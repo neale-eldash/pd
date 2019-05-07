@@ -171,3 +171,15 @@ tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
 
   return(df.tab)
 }
+
+######################################
+##### edited View function
+
+View_ <- function(df){
+
+  var.change <- names(df)[purrr:::map_chr(df,~class(.)) == "list"]
+  df[,var.change] <- "list (hidden)"
+  View(df)
+
+}
+
