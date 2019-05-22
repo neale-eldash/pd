@@ -175,6 +175,7 @@ tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
 ######################################
 ##### edited View function
 
+#over-ridding utils View function
 View_ <- function(df){
   #' Invoke a Data Viewer, but removes list-columns so that R doesn't crash.
   #'
@@ -196,4 +197,5 @@ View_ <- function(df){
   View(df)
 
 }
+
 
