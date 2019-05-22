@@ -16,5 +16,12 @@ Invisible \emph{NULL}. The functions puts up a window and returns immediately: t
 Invoke a Data Viewer, but removes list-columns so that R doesn't crash.
 }
 \examples{
+
+#generate list-column dataframe
+df <- tibble(id=1:10,tab=map(1:10,~iris))
+
+#utils View function
+View(df)
+
 View_(df)
 }
