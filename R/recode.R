@@ -182,6 +182,13 @@ View_ <- function(df){
   #' @return Invisible \emph{NULL}. The functions puts up a window and returns immediately: the window can be closed via its controls or menus.
   #'
   #' @examples
+  #'
+  #' #generate list-column dataframe
+  #' df <- tibble(id=1:10,tab=map(1:10,~iris))
+  #'
+  #' #utils View function
+  #' View(df)
+  #'
   #' View_(df)
 
   var.change <- names(df)[purrr:::map_chr(df,~class(.)) == "list"]
