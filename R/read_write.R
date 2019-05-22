@@ -134,3 +134,8 @@ update_xlsx <- function(df,file,sheet){
   saveWorkbook(wb, file, overwrite = TRUE)
 
 }
+
+##########
+### paste copied (CTRL+C) items
+### use datapasta
+### dpasta() instead of dput()
