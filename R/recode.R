@@ -307,7 +307,7 @@ tab_copa_america <- function(info,nome1,nome2,prob1,prob2){
          <td height="6">
          </td>
          <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[1],'</td>
-         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[1],'
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[1],'
          </td>
          <td style="border-width:2px 3px 1px 0; border-style: solid;border-color:black;" rowspan="6">&nbsp;
          </td></tr>
