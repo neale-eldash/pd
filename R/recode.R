@@ -198,4 +198,263 @@ View_ <- function(df){
 
 }
 
+#rendering HTML code in RStudio viewer
+view_html <- function(html_txt){
+  #' render's HTML code in RStudio's Viewer. To do this, first it creates a temporary file
+  #' and the the file is called to be displayed in the viewer.
+  #'
+  #' @param html_txt HTML code to be rendered.
+  #' @return Invisible \emph{NULL}. The functions puts up a Viewer window and returns immediately.
+  #'
+  #' @examples
+  #'
+  #' #generate html
+  #'   df <- tibble(
+  #'     id = 1:8,
+  #'     info = paste0("info jogo",id),
+  #'     nome1 = paste0("time 1 - J",id),
+  #'     nome2 = paste0("time 2 - J",id),
+  #'     prob1 = paste0("prob 1 - J",id),
+  #'     prob2 = paste0("prob 2 - J",id)
+  #'   )
+  #'
+
+  tempDir <- tempfile()
+  dir.create(tempDir)
+  htmlFile <- file.path(tempDir, "test.html")
+  writeLines(html_txt, htmlFile)
+  rstudio::viewer(htmlFile)
+
+}
+
+#function used for example in view_html function
+tab_copa_america <- function(info,nome1,nome2,prob1,prob2){
+  paste0('
+         <table style="font-size: 90%; margin:1em 2em 1em 1em;" border="0" cellspacing="0" cellpadding="0">
+         <tbody><tr>
+         <td height="6">
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f2f2f2" colspan="2">Quartas de final
+         </td>
+         <td colspan="2">
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f2f2f2" colspan="2">Semifinais
+         </td>
+         <td colspan="2">
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f2f2f2" colspan="2">Final
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td width="170">&nbsp;
+         </td>
+         <td width="50">&nbsp;
+         </td>
+         <td width="20">&nbsp;
+         </td>
+         <td width="25">&nbsp;
+         </td>
+         <td width="170">&nbsp;
+         </td>
+         <td width="50">&nbsp;
+         </td>
+         <td width="20">&nbsp;
+         </td>
+         <td width="25">&nbsp;
+         </td>
+         <td width="170">&nbsp;
+         </td>
+         <td width="50">&nbsp;
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[1],' 27 de junho –<a title="Porto Alegre" href="/wiki/Porto_Alegre">Porto Alegre</a>
+         </td>
+         <td style="border-width:0 0 1px 0; border-style: solid;border-color:black;" rowspan="4">&nbsp;
+         </td>
+         <td style="border-width:0 0 1px 0; border-style: solid;border-color:black;" rowspan="7">&nbsp;
+         </td>
+         <td rowspan="3" colspan="2">
+         </td>
+         <td style="border-width:0 0 1px 0; border-style: solid;border-color:black;" rowspan="7">&nbsp;
+         </td>
+         <td style="border-width:0 0 1px 0; border-style: solid;border-color:black;" rowspan="13">&nbsp;
+         </td>
+         <td rowspan="9" colspan="2">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[1],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[1],'</td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[5],' 2 de julho –<a title="Belo Horizonte" href="/wiki/Belo_Horizonte">Belo Horizonte</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[1],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[1],'
+         </td>
+         <td style="border-width:2px 3px 1px 0; border-style: solid;border-color:black;" rowspan="6">&nbsp;
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[5],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[5],'</td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[2],' - 28 de junho –<a title="Rio de Janeiro" href="/wiki/Rio_de_Janeiro">Rio de Janeiro</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border-width:2px 0 1px 0; border-style: solid;border-color:black;" rowspan="12">&nbsp;
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[5],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[5],'</td>
+         <td style="border-width:2px 3px 1px 0; border-style: solid;border-color:black;" rowspan="12">&nbsp;
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[2],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[2],'</td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="6" colspan="2">
+         </td>
+         <td rowspan="2" colspan="2">',info[8],' 7 de julho –<a title="Rio de Janeiro" href="/wiki/Rio_de_Janeiro">Rio de Janeiro</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[2],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[2],'</td>
+         <td style="border-width:2px 0 1px 0; border-style: solid;border-color:black;" rowspan="6">&nbsp;
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[8],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[8],'
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[3],' - 28 de junho –<a title="São Paulo" href="/wiki/S%C3%A3o_Paulo">São Paulo</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border-width:2px 0 0 0; border-style: solid;border-color:black;" rowspan="11">&nbsp;
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[8],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[8],'
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[3],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[3],'</td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[6],' 3 de julho –<a title="Porto Alegre" href="/wiki/Porto_Alegre">Porto Alegre</a>
+         </td>
+         <td rowspan="2" colspan="2">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[3],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[3],'</td>
+         <td style="border-width:2px 3px 1px 0; border-style: solid;border-color:black;" rowspan="6">&nbsp;
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[6],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[6],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f2f2f2" rowspan="2" colspan="2">3º lugar
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="2" colspan="2">',info[4],' - 29 de junho –<a title="Salvador" href="/wiki/Salvador">Salvador</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border-width:2px 0 0 0; border-style: solid;border-color:black;" rowspan="5">&nbsp;
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[6],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[6],'
+         </td>
+         <td style="border-width:2px 0 0 0; border-style: solid;border-color:black;" rowspan="5">&nbsp;
+         </td>
+         <td colspan="2">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[4],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[4],'</td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome1[7],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob1[7],'
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td rowspan="3" colspan="2">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[4],'</td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[4],'</td>
+         <td style="border-width:2px 0 0 0; border-style: solid;border-color:black;" rowspan="2">&nbsp;
+         </td>
+         <td style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',nome2[7],'
+         </td>
+         <td align="center" style="border:1px solid #aaa;" bgcolor="#f9f9f9" rowspan="2">',prob2[7],'
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td colspan="2">
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td colspan="8">
+         </td>
+         <td valign="top" rowspan="2" colspan="2">',info[7],' 6 de julho –<a title="São Paulo" href="/wiki/S%C3%A3o_Paulo">São Paulo</a>
+         </td></tr>
+         <tr>
+         <td height="6">
+         </td>
+         <td colspan="8">
+         </td>
+         </tr></tbody>
+         </table>                                                                                                                                                                                                                   </td></tr></tbody></table>
+         ')}
 
