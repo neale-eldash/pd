@@ -200,8 +200,10 @@ View_ <- function(df){
 
 #rendering HTML code in RStudio viewer
 view_html <- function(html_txt){
-  #' render's HTML code in RStudio's Viewer. To do this, first it creates a temporary file
-  #' and the the file is called to be displayed in the viewer.
+  #' render's HTML code in RStudio's Viewer.
+  #'
+  #' To render's HTML code in RStudio's Viewer, first this function creates a temporary file
+  #' and then file is loaded to be displayed in the viewer.
   #'
   #' @param html_txt HTML code to be rendered.
   #' @return Invisible \emph{NULL}. The functions puts up a Viewer window and returns immediately.
@@ -217,9 +219,9 @@ view_html <- function(html_txt){
   #'     prob1 = paste0("prob 1 - J",id),
   #'     prob2 = paste0("prob 2 - J",id)
   #'   )
-  #'
-  #'
   #' html_txt <- pd:::tab_copa_america(df$info,df$nome1,df$nome2,df$prob1,df$prob2)
+  #'
+  #' #view it in RStudio's Viewer
   #' view_html(html_txt)
   #'
 
