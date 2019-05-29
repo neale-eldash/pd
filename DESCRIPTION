@@ -18,7 +18,8 @@ Depends: tidyverse,
          rmarkdown,
          tableHTML,
          rpart,
-         rpart.plot
+         rpart.plot,
+         rstudioapi
 RoxygenNote: 6.1.0
 Suggests: knitr,
     testthat
