@@ -29,4 +29,8 @@ and the the file is called to be displayed in the viewer.
     prob2 = paste0("prob 2 - J",id)
   )
 
+
+html_txt <- pd:::tab_copa_america(df$info,df$nome1,df$nome2,df$prob1,df$prob2)
+view_html(html_txt)
+
 }
