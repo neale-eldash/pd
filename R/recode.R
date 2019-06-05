@@ -228,7 +228,7 @@ view_html <- function(html_txt){
   tempDir <- tempfile()
   dir.create(tempDir)
   htmlFile <- file.path(tempDir, "test.html")
-  writeLines(html_txt, htmlFile)
+  writeLines(as.character(html_txt), htmlFile)
   rstudioapi::viewer(htmlFile)
 
 }
