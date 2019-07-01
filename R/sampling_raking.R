@@ -529,7 +529,8 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
     diff=weights - pop
   )
 
-  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
+  #check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
+  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
   check.tot <- check.tot %>% ungroup() %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
@@ -738,7 +739,8 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     diff=weights - pop
   )
 
-  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
+  #check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-cruz,-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
+  check.tot <- check.tot %>% dplyr::group_by(cruz) %>% dplyr::summarise_at(vars(-var,-categ,-ends_with('.wgt')),funs(sum(.,na.rm = TRUE)))
   check.tot <- check.tot %>% ungroup() %>% dplyr::mutate(
     raw=round(100*raw/sum(raw,na.rm = TRUE),1),
     weights=round(100*weights/sum(weights,na.rm = TRUE),1),
