@@ -604,19 +604,20 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   #'
   #' ## Raking WITHOUT crossing variable:
   #' targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
-  #' targets <- targets %>% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
-  #' targets <- targets %>% tidyr::gather(var,categ,-regiao,-pop)
-  #' targets <- targets %>% dplyr::group_by(regiao,var,categ) %>% dplyr::summarise(pop=sum(pop))
-  #' targets.cruz <- targets %>% dplyr::filter(is.na(categ) == FALSE) %>% ungroup()
-  #' teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
-  #'
-  #' ## Raking WITH crossing variable:
-  #' targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
   #' targets <- targets %>% dplyr::select(pesoe,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
   #' targets <- targets %>% tidyr::gather(var,categ,-pop)
   #' targets <- targets %>% dplyr::group_by(var,categ) %>% dplyr::summarise(pop=sum(pop))
   #' targets <- targets %>% dplyr::filter(is.na(categ) == FALSE)
   #' teste.targets <- rake_target(df.svy=svy,targets=targets,reg.exp.vars="_cota$",reg.exp.cruz=NA,reg.exp.id="^numericalId$")
+  #'
+  #' ## Raking WITH crossing variable:
+  #' targets <- pop %>% dplyr::filter(!is.na(classe_cota),!is.na(idade_cota))
+  #' targets <- targets %>% dplyr::select(pesoe,regiao,sexo_cota,idade_cota,classe_cota) %>% dplyr::rename(pop=pesoe)
+  #' targets <- targets %>% tidyr::gather(var,categ,-regiao,-pop)
+  #' targets <- targets %>% dplyr::group_by(regiao,var,categ) %>% dplyr::summarise(pop=sum(pop))
+  #' targets.cruz <- targets %>% dplyr::filter(is.na(categ) == FALSE) %>% ungroup()
+  #' teste.targets.cruz <- rake_target(df.svy=svy,targets=targets.cruz,reg.exp.vars="_cota$",reg.exp.cruz="^regiao$",reg.exp.id="^numericalId$")
+
 
   reg.exp.vars <- ifelse(is.na(reg.exp.vars)," ",reg.exp.vars)
   reg.exp.cruz <- ifelse(is.na(reg.exp.cruz)," ",reg.exp.cruz)
