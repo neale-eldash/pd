@@ -124,7 +124,7 @@ df_summary <- function(df,drop=FALSE){
   df.sum <- tibble(
     var = names(df),
     name = purrr::map_chr(df,~ifelse(is.null(attr(.,which="label")),NA,attr(.,which="label"))),
-    class = purrr::map_chr(df,~class(.)),
+    class = purrr::map(df,~class(.)),
     valid = purrr::map_int(df,~sum(!is.na(.))),
     na = purrr::map_int(df,~sum(is.na(.))),
     n.distinct = purrr::map_int(df,~length(unique(.)))
