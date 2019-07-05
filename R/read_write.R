@@ -36,7 +36,8 @@ get_spss <- function(file){
   #' spss.vars <- spss$vars
 
   spss <- read_spss(file)
-  spss <- as_factor(spss,only_labelled = TRUE,ordered=TRUE)
+  #spss <- as_factor(spss,only_labelled = TRUE,ordered=TRUE)
+  spss <- as_factor(spss,only_labelled = TRUE)
   vars <- df_summary(spss)
 
   return(list(sav=spss,vars=vars))
