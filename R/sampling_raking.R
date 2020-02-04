@@ -265,9 +265,9 @@ check_categs <- function(x,y){
   df.x <- x %>% tidyr::drop_na() %>% tidyr::gather(var,categ) %>% dplyr::group_by(var,categ) %>% dplyr::count() %>% dplyr::rename(n.x=n)
   df.y <- y %>% tidyr::drop_na() %>% tidyr::gather(var,categ) %>% dplyr::group_by(var,categ) %>% dplyr::count() %>% dplyr::rename(n.y=n)
   df <- df.x %>% dplyr::full_join(df.y)
-  if (sum(is.na(df$n.x))>0 | sum(is.na(df$n.y))>0){
+  if (sum(is.na(df$n.y))>0){
     print(df)
-    stop("erro de codificação das variáveis.")
+    stop("erro de codificação das variáveis. Existem categorias na amostra que não existem na população!")
   }
   return(df)
 }
@@ -283,9 +283,9 @@ check_targets <- function(x,t){
   }
 
   df <- df.x %>% dplyr::full_join(df.y)
-  if (sum(is.na(df$n.x))>0 | sum(is.na(df$n.y))>0){
+  if (sum(is.na(df$n.y))>0){
     print(df)
-    stop("erro de codificação das variáveis.")
+    stop("erro de codificação das variáveis. Existem categorias na amostra que não existem na população!")
   }
 
   return(df)
