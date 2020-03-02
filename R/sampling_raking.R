@@ -692,7 +692,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     stop("Variável ID não foi corretamente definida.")
   }
   df.svy[,"id"] <- df.svy[,var_id]
-  if (length(unique(svy.vote$RESPID)) < nrow(svy.vote)){
+  if (length(unique(df.svy$RESPID)) < nrow(df.svy)){
     stop("Variável ID tem duplicidade.")
   }
 
