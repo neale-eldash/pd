@@ -391,7 +391,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
   check.vars.pop <- names(dplyr::select(df.pop,dplyr::matches(reg.exp.vars)))
   vars_cota <- intersect(check.vars.svy,check.vars.pop)
   if (length(check.vars.svy) == 0 | length(check.vars.pop) == 0){
-    stop("Mão foram encontradas variáveis de cota em uma das bases.")
+    stop("Não foram encontradas variáveis de cota em uma das bases.")
   }
   if (length(vars_cota) == 0){
     stop("Não existem variáveis de cota comuns entre as bases.")
@@ -430,7 +430,7 @@ rake_df <- function(df.svy=NA,df.pop=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg.exp.
     stop("Variável ID não foi corretamente definida.")
   }
   df.svy[,"id"] <- df.svy[,var_id]
-  if (length(unique(df.svy$RESPID)) < nrow(df.svy)){
+  if (length(unique(df.svy$id)) < nrow(df.svy)){
     stop("Variável ID tem duplicidade.")
   }
 
@@ -642,7 +642,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
   check.vars.pop <- unique(targets$var)
   vars_cota <- intersect(check.vars.svy,check.vars.pop)
   if (length(check.vars.svy) == 0 | length(check.vars.pop) == 0){
-    stop("Mão foram encontradas variáveis de cota em uma das bases.")
+    stop("Não foram encontradas variáveis de cota em uma das bases.")
   }
   if (length(vars_cota) == 0){
     stop("Não existem variáveis de cota comuns entre as bases.")
@@ -692,7 +692,7 @@ rake_target <- function(df.svy=NA,targets=NA,reg.exp.vars=NA,reg.exp.cruz=NA,reg
     stop("Variável ID não foi corretamente definida.")
   }
   df.svy[,"id"] <- df.svy[,var_id]
-  if (length(unique(df.svy$RESPID)) < nrow(df.svy)){
+  if (length(unique(df.svy$id)) < nrow(df.svy)){
     stop("Variável ID tem duplicidade.")
   }
 
