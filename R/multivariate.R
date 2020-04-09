@@ -21,36 +21,46 @@ auto_cluster <- function(df=NULL,grps=3:6,name='kmeans',iter.max=100){
   #' @param grps An \emph{array} or \emph{number} with the number of groups that should be created.
   #' @param name A \emph{string} with the name of the variables that will be created.
   #' @param iter.max A \emph{number} indicating the maximum number of iterations for the Kmeans cluster.
-  #' @return A list with two components:
+  #' @return A list with three components:
   #' \itemize{
   #'  \item \strong{grps}\emph{(dataframe)}: with the variables identifying the cluster each observation
   #'  belongs too.
-  #'  \item \strong{vars}\emph{(dataframe)}: summary of the number of observations per cluster.
+  #'  \item \strong{summary}\emph{(dataframe)}: summary of the number of observations per cluster.
+  #'  \item \strong{details}\emph{(dataframe)}: details for each iteration of the kmeans algorithm.
   #' }
   #' @examples
   #' df.cluster <- auto_cluster(df=df,grps=3:6,name='kmeans')
   #'
-  
+
   df_ <- df
-  
+
+  details <- tibble(
+    grupos=grps,
+    tss = NA,
+    details = NA
+  )
+
   d <- dist(df, method = "euclidean")
   hrq <- hclust(d, method="ward")
-  
+
   for (i in grps){
     grp <- cutree(hrq, k=i)
     aux.df <- cbind(grp,df)
     aux.df <- aux.df %>% dplyr::group_by(grp) %>% dplyr::summarise_each(funs(mean))
     aux <- as.matrix(aux.df[,-1])
-    
+
     #Cluster kmeans
-    df_[,paste0(name,i)] <- kmeans(df, aux, iter.max = iter.max)$cluster
+    cluster <- kmeans(df, aux, iter.max = iter.max)
+    details$tss[details$grupos==i] <- cluster$tot.withinss
+    details$details[details$grupos==i] <- list(cluster)
+    df_[,paste0(name,i)] <- cluster$cluster
   }
-  
+
   df_ <- df_ %>% dplyr::select(starts_with(name))
   df.seg <- df_ %>% tidyr::gather(var,seg) %>% dplyr::group_by(var,seg) %>% dplyr::summarise(n=n())
   df.seg <- as.data.frame(df.seg %>% tidyr::spread(var,n))
-  
-  return(list(grps=df_,summary=df.seg))
+
+  return(list(grps=df_,summary=df.seg,details=details))
 }
 
 ######################################
@@ -91,22 +101,22 @@ factor_analysis <- function(df=NULL,n.fat=NULL,name="fator",sep=".",rotation="va
   #' @examples
   #' df_factan <- factor_analysis(df=df,cut=0.2)
   #'
-  
+
   #number of factors
   if (is.null(n.fat)){
     n.fat <- eigen(cor(df,use = "pairwise.complete.obs"))
     n.fat <- sum(n.fat$values >= 1)
   }
-  
+
   #if there are missings
   #cov.mat <- cov(df[,-1],use = "pairwise.complete.obs")
   #fit <- factanal(x=df[,-1], factors=n.fat, covmat=cov.mat, rotation="varimax",scores="regression")
-  
+
   fit <- factanal(x=df, factors=n.fat, rotation=rotation,scores=scores)
-  
+
   df.scores <- as.data.frame(fit$scores)
   names(df.scores) <- paste0(name,sep,1:n.fat)
-  
+
   load <- as.data.frame(fit$loadings[])
   names(load) <- paste0(name,sep,1:n.fat)
   load$fator <- apply(abs(load),1,which.max)
@@ -117,7 +127,7 @@ factor_analysis <- function(df=NULL,n.fat=NULL,name="fator",sep=".",rotation="va
   load <- load %>% tidyr::spread(factor,loading)
   load <- load %>% dplyr::arrange(fator,-max)
   load <- load[,c('var','fator',paste0(name,sep,1:n.fat))]
-  
+
   return(list(factors=df.scores,loadings=load,details=fit))
 }
 
