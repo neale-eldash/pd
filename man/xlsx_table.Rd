@@ -4,9 +4,20 @@
 \alias{xlsx_table}
 \title{Generate nice formated tables in excel.}
 \usage{
-xlsx_table(df, wb, sheet, tit.sep = NA, lin.inic = 1, col.inic = 1,
-  width.first = 30, width.cols = 20, title_font = "blue1",
-  title_bg = "lightcyan", col1_font = "black", col1_bg = "lightgrey")
+xlsx_table(
+  df,
+  wb,
+  sheet,
+  tit.sep = NA,
+  lin.inic = 1,
+  col.inic = 1,
+  width.first = 30,
+  width.cols = 20,
+  title_font = "blue1",
+  title_bg = "lightcyan",
+  col1_font = "black",
+  col1_bg = "lightgrey"
+)
 }
 \arguments{
 \item{df}{The \emph{dataframe} to be exported.}

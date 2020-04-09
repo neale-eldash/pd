@@ -4,8 +4,7 @@
 \alias{auto_cluster}
 \title{Cluster Analysis combining Hierarquical and Kmeans cluster}
 \usage{
-auto_cluster(df = NULL, grps = 3:6, name = "kmeans",
-  iter.max = 100)
+auto_cluster(df = NULL, grps = 3:6, name = "kmeans", iter.max = 100)
 }
 \arguments{
 \item{df}{A \emph{dataframe} containing the variables to be used in the analysis.}
@@ -17,11 +16,12 @@ auto_cluster(df = NULL, grps = 3:6, name = "kmeans",
 \item{iter.max}{A \emph{number} indicating the maximum number of iterations for the Kmeans cluster.}
 }
 \value{
-A list with two components:
+A list with three components:
 \itemize{
  \item \strong{grps}\emph{(dataframe)}: with the variables identifying the cluster each observation
  belongs too.
- \item \strong{vars}\emph{(dataframe)}: summary of the number of observations per cluster.
+ \item \strong{summary}\emph{(dataframe)}: summary of the number of observations per cluster.
+ \item \strong{details}\emph{(dataframe)}: details for each iteration of the kmeans algorithm.
 }
 }
 \description{

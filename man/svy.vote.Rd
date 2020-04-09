@@ -11,4 +11,7 @@ svy.vote
 \description{
 Base de dados de pesquisa online sobre intenção de voto nos EUA, filtrada para idade maior ou igual a 18 anos.
 }
+\details{
+
+}
 \keyword{datasets}

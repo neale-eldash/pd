@@ -4,8 +4,7 @@
 \alias{tab_summary}
 \title{Summary table is created, automatically adding marginal}
 \usage{
-tab_summary(df = NULL, reg.exp_lin = NULL, reg.exp_col = NULL,
-  wgt = NULL)
+tab_summary(df = NULL, reg.exp_lin = NULL, reg.exp_col = NULL, wgt = NULL)
 }
 \arguments{
 \item{df}{A \emph{dataframe} containing the variables to be used in the analysis.}

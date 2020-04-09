@@ -4,8 +4,15 @@
 \alias{factor_analysis}
 \title{Factor Analysis choosing number of factors automatically}
 \usage{
-factor_analysis(df = NULL, n.fat = NULL, name = "fator", sep = ".",
-  rotation = "varimax", scores = "regression", cut = 0.2)
+factor_analysis(
+  df = NULL,
+  n.fat = NULL,
+  name = "fator",
+  sep = ".",
+  rotation = "varimax",
+  scores = "regression",
+  cut = 0.2
+)
 }
 \arguments{
 \item{df}{A \emph{dataframe} containing the variables to be used in the analysis.}

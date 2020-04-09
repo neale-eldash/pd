@@ -4,8 +4,13 @@
 \alias{rake_target}
 \title{Rake sample to match population (Population input is a data frame of aggregated targets).}
 \usage{
-rake_target(df.svy = NA, targets = NA, reg.exp.vars = NA,
-  reg.exp.cruz = NA, reg.exp.id = NA)
+rake_target(
+  df.svy = NA,
+  targets = NA,
+  reg.exp.vars = NA,
+  reg.exp.cruz = NA,
+  reg.exp.id = NA
+)
 }
 \arguments{
 \item{df.svy}{The sample \emph{dataframe}, containing the variables to be used in the analysis (unique id,

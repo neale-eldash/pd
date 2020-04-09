@@ -4,8 +4,16 @@
 \alias{chaid_raking}
 \title{CHAID Rake sample to match population (Population input is a data frame of population).}
 \usage{
-chaid_raking(df.pop, df.svy, strata = NULL, id.var = NULL,
-  dep = NULL, wgt.pop = NULL, minbucket = 30, cp = 0.001)
+chaid_raking(
+  df.pop,
+  df.svy,
+  strata = NULL,
+  id.var = NULL,
+  dep = NULL,
+  wgt.pop = NULL,
+  minbucket = 30,
+  cp = 0.001
+)
 }
 \arguments{
 \item{df.pop}{The population \emph{dataframe}, containing the variables to be used in the analysis (weights,
