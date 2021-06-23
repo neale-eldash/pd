@@ -4,7 +4,9 @@
 \name{pop}
 \alias{pop}
 \title{Dados da Ambima}
-\format{An object of class \code{data.frame} with 967 rows and 6 columns.}
+\format{
+An object of class \code{data.frame} with 967 rows and 6 columns.
+}
 \usage{
 pop
 }

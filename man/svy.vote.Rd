@@ -4,7 +4,9 @@
 \name{svy.vote}
 \alias{svy.vote}
 \title{Pesquisa eleitoral online}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 52368 rows and 14 columns.}
+\format{
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 52368 rows and 14 columns.
+}
 \usage{
 svy.vote
 }

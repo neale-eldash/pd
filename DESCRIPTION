@@ -20,7 +20,7 @@ Depends: tidyverse,
          rpart,
          rpart.plot,
          rstudioapi
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Suggests: knitr,
     testthat
 VignetteBuilder: knitr

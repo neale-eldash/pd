@@ -151,6 +151,7 @@ tab_summary <- function(df=NULL,reg.exp_lin=NULL,reg.exp_col=NULL,wgt=NULL){
   #'
 
 
+  df <- as.data.frame(df)
   if (is.null(wgt)){
     df$peso <- 1
   } else {

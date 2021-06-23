@@ -4,7 +4,9 @@
 \name{cps}
 \alias{cps}
 \title{Base de dados da pesquisa CPS (Current Population Survey) do censo americano.}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 98991 rows and 12 columns.}
+\format{
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 98991 rows and 12 columns.
+}
 \usage{
 cps
 }
